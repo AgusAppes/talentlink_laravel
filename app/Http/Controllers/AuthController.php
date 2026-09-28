@@ -62,22 +62,8 @@ class AuthController extends Controller
         // sirve para evitar ataques de sesión
         $request->session()->regenerate();
 
-        $user = $request->user();
-
-        // Verificamos el rol del usuario
-        // esAdmin(), esEmpresa(), esCandidato() son funciones que se definen en el modelo User
-        // si es admin, se redirige al dashboard
-        if ($user->esAdmin()) {
-            return redirect()->route('dashboard');
-        }
-
-        // si es empresa, se redirige a la creación de solicitudes
-        if ($user->esEmpresa()) {
-            return redirect()->route('solicitudes.create');
-        }
-
-        // si es candidato, se redirige a la lista de ofertas
-        return redirect()->route('ofertas.index');
+        // Redirige a la vista que corresponda segun el rol del usuario
+        return redirect()->route(auth()->user()->rutaInicio());
     }
 
     public function logout(Request $request)

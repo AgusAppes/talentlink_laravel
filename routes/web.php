@@ -28,4 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/ofertas', function () {
         return view('placeholder', ['titulo' => 'Ofertas']);
     })->name('ofertas.index');
+
+    Route::view('/solicitudes', 'placeholder', ['titulo' => 'Solicitudes'])->name('solicitudes.index');
+    Route::view('/candidatos', 'placeholder', ['titulo' => 'Candidatos'])->name('candidatos.index');
+    Route::view('/mi-perfil', 'placeholder', ['titulo' => 'Mi perfil'])->name('candidatos.perfil');
+    Route::view('/postulaciones', 'placeholder', ['titulo' => 'Postulaciones'])->name('postulaciones.index');
+    Route::view('/mi-empresa', 'placeholder', ['titulo' => 'Mi empresa'])->name('empresas.perfil');
+    Route::view('/usuarios', 'placeholder', ['titulo' => 'Usuarios'])->name('usuarios.index');
 });
