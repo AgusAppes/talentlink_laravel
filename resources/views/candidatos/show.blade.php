@@ -7,12 +7,21 @@
     <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
     <link rel="stylesheet" href="{{ asset('css/postulaciones.css') }}">
     <link rel="stylesheet" href="{{ asset('css/candidatos.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/perfil.css') }}">
 @endpush
 
 @section('content')
     <a class="can-volver" href="{{ route('candidatos.index') }}">← Volver a candidatos</a>
 
     <section class="tl-card">
+        <div class="per-foto-fila">
+            @if ($candidato->foto)
+                <img class="per-foto" src="{{ asset('storage/'.$candidato->foto) }}" alt="Foto de {{ $candidato->nombre }}">
+            @else
+                <span class="per-avatar">{{ $candidato->usuario->iniciales() }}</span>
+            @endif
+        </div>
+
         <dl class="can-datos">
             <div>
                 <dt>Nombre y apellido</dt>
@@ -37,6 +46,37 @@
                 </dd>
             </div>
         </dl>
+    </section>
+
+    <section class="tl-card can-bloque">
+        <h2>Acerca de</h2>
+        @if ($candidato->descripcion)
+            <p class="exp-texto">{!! nl2br(e($candidato->descripcion)) !!}</p>
+        @else
+            <p class="sol-vacio">Sin descripción.</p>
+        @endif
+    </section>
+
+    <section class="tl-card can-bloque">
+        <h2>Habilidades</h2>
+        @if ($candidato->habilidades->isEmpty())
+            <p class="sol-vacio">Sin habilidades cargadas.</p>
+        @else
+            <div class="tag-lista">
+                @foreach ($candidato->habilidades as $habilidad)
+                    <span class="tag">{{ $habilidad->nombre }}</span>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    <section class="tl-card can-bloque">
+        <h2>Experiencia laboral</h2>
+        @include('candidatos._experiencias', [
+            'experiencias' => $candidato->experiencias,
+            'editable' => false,
+            'vacio' => 'Sin experiencias cargadas.',
+        ])
     </section>
 
     <section class="tl-card can-bloque">

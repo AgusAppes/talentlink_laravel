@@ -1,0 +1,148 @@
+.per-bloque {
+    margin-top: 16px;
+}
+
+.per-bloque h2,
+.can-bloque h2 {
+    margin: 0 0 14px;
+    color: var(--tl-ink-900);
+    font-size: 1.15rem;
+}
+
+.per-foto-fila {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.per-foto,
+.per-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex: 0 0 96px;
+}
+
+.per-foto {
+    object-fit: cover;
+}
+
+.per-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tl-brand-700);
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.per-quitar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    color: var(--tl-ink-700);
+    font-size: 14px;
+}
+
+.tag-campo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+    border-radius: 8px;
+}
+
+#tags {
+    display: contents;
+}
+
+.tag-campo input {
+    flex: 1;
+    min-width: 180px;
+    padding: 4px;
+    border: 0;
+    outline: none;
+    font: inherit;
+    color: var(--tl-ink-900);
+    background: transparent;
+}
+
+.tag-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--tl-brand-700);
+    font-size: 13px;
+}
+
+.tag-quitar {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--tl-brand-700);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.exp-lista {
+    margin: 0;
+    padding: 0 0 0 16px;
+    list-style: none;
+    border-left: 2px solid var(--tl-border-200);
+}
+
+.exp-item {
+    padding-bottom: 16px;
+}
+
+.exp-item:last-child {
+    padding-bottom: 0;
+}
+
+.exp-puesto {
+    margin: 0;
+    color: var(--tl-ink-900);
+    font-weight: 700;
+}
+
+.exp-empresa,
+.exp-periodo,
+.exp-texto {
+    margin: 4px 0 0;
+    color: var(--tl-muted-600);
+}
+
+.exp-texto {
+    color: var(--tl-ink-700);
+}
+
+.exp-eliminar {
+    margin-top: 8px;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--tl-ink-700);
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.exp-eliminar:hover {
+    background: var(--tl-surface-0);
+}

@@ -29,6 +29,8 @@ class CandidatoController extends Controller
         $candidato->load([
             'usuario',
             'ciudad.provincia',
+            'habilidades',
+            'experiencias',
             'postulaciones' => function ($postulaciones) {
                 $postulaciones
                     ->with([

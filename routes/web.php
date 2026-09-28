@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permiso:candidatos.editar')->group(function () {
         Route::get('/mi-perfil', [PerfilController::class, 'candidato'])->name('candidatos.perfil');
         Route::put('/mi-perfil', [PerfilController::class, 'actualizarCandidato'])->name('candidatos.perfil.update');
+        Route::post('/mi-perfil/experiencias', [PerfilController::class, 'storeExperiencia'])->name('perfil.experiencias.store');
+        Route::delete('/mi-perfil/experiencias/{id}', [PerfilController::class, 'destroyExperiencia'])->name('perfil.experiencias.destroy');
     });
 
     Route::get('/postulaciones', [PostulacionController::class, 'index'])

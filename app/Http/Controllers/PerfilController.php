@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ciudad;
+use App\Models\Habilidad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PerfilController extends Controller
 {
@@ -16,7 +19,7 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        $candidato->load('ciudad.provincia');
+        $candidato->load(['ciudad.provincia', 'habilidades', 'experiencias']);
 
         $ciudades = Ciudad::query()
             ->with('provincia')
@@ -31,7 +34,7 @@ class PerfilController extends Controller
 
     // Esta función guarda el perfil del candidato
     // En terminos tecnicos, cuando se envía el formulario de /mi-perfil, se ejecuta esta función
-    // y actualiza nombre, apellido, fecha de nacimiento y ciudad
+    // y actualiza los datos, la foto y las habilidades
     public function actualizarCandidato(Request $request)
     {
         $candidato = $request->user()->candidato;
@@ -45,6 +48,10 @@ class PerfilController extends Controller
             'apellido' => ['required', 'string', 'max:45'],
             'fecha_nac' => ['nullable', 'date', 'before:today'],
             'ciudades_id' => ['nullable', 'exists:ciudades,id'],
+            'descripcion' => ['nullable', 'string', 'max:1000'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'habilidades' => ['nullable', 'array', 'max:10'],
+            'habilidades.*' => ['string', 'max:50'],
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'nombre.max' => 'El nombre no puede superar los 45 caracteres.',
@@ -53,18 +60,122 @@ class PerfilController extends Controller
             'fecha_nac.date' => 'La fecha de nacimiento no es válida.',
             'fecha_nac.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
             'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
+            'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
+            'foto.image' => 'La foto debe ser una imagen.',
+            'foto.mimes' => 'La foto debe ser JPG o PNG.',
+            'foto.max' => 'La foto no puede superar los 2 MB.',
+            'habilidades.max' => 'Podés cargar hasta 10 habilidades.',
+            'habilidades.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
         ]);
 
-        $candidato->update([
-            'nombre' => $datos['nombre'],
-            'apellido' => $datos['apellido'],
-            'fecha_nac' => $datos['fecha_nac'],
-            'ciudades_id' => $datos['ciudades_id'],
-        ]);
+        $foto = $candidato->foto;
+
+        if ($request->hasFile('foto')) {
+            if ($foto) {
+                Storage::disk('public')->delete($foto);
+            }
+
+            $foto = $request->file('foto')->store('fotos', 'public');
+        } elseif ($request->boolean('quitar_foto') && $foto) {
+            Storage::disk('public')->delete($foto);
+            $foto = null;
+        }
+
+        DB::transaction(function () use ($request, $candidato, $datos, $foto) {
+            $candidato->update([
+                'nombre' => $datos['nombre'],
+                'apellido' => $datos['apellido'],
+                'fecha_nac' => $datos['fecha_nac'],
+                'ciudades_id' => $datos['ciudades_id'],
+                'descripcion' => $datos['descripcion'],
+                'foto' => $foto,
+            ]);
+
+            $nombres = collect($request->input('habilidades', []))
+                ->map(fn ($habilidad) => trim($habilidad))
+                ->filter()
+                ->unique(fn ($habilidad) => mb_strtolower($habilidad));
+
+            $catalogo = Habilidad::query()->get();
+
+            $ids = $nombres->map(function ($nombre) use ($catalogo) {
+                $existente = $catalogo->first(function (Habilidad $item) use ($nombre) {
+                    return mb_strtolower($item->nombre) === mb_strtolower($nombre);
+                });
+
+                if (! $existente) {
+                    $existente = Habilidad::create(['nombre' => $nombre]);
+                    $catalogo->push($existente);
+                }
+
+                return $existente->id;
+            })->all();
+
+            $candidato->habilidades()->sync($ids);
+        });
 
         return redirect()
             ->route('candidatos.perfil')
             ->with('ok', 'Perfil actualizado correctamente.');
+    }
+
+    // Esta función agrega una experiencia laboral
+    // En terminos tecnicos, cuando se envía el formulario de experiencia, se ejecuta esta función
+    // y crea la fila en experiencias del candidato logueado
+    public function storeExperiencia(Request $request)
+    {
+        $candidato = $request->user()->candidato;
+
+        if (! $candidato) {
+            abort(403);
+        }
+
+        $datos = $request->validate([
+            'empresa' => ['required', 'string', 'max:100'],
+            'puesto' => ['nullable', 'string', 'max:100'],
+            'fecha_desde' => ['nullable', 'date_format:Y-m'],
+            'fecha_hasta' => ['nullable', 'date_format:Y-m', 'after_or_equal:fecha_desde'],
+            'descripcion' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'empresa.required' => 'El nombre de la empresa es obligatorio.',
+            'empresa.max' => 'El nombre de la empresa no puede superar los 100 caracteres.',
+            'puesto.max' => 'El puesto no puede superar los 100 caracteres.',
+            'fecha_desde.date_format' => 'La fecha de inicio no es válida.',
+            'fecha_hasta.date_format' => 'La fecha de fin no es válida.',
+            'fecha_hasta.after_or_equal' => 'La fecha de fin no puede ser anterior a la de inicio.',
+            'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
+        ]);
+
+        $candidato->experiencias()->create([
+            'empresa' => $datos['empresa'],
+            'puesto' => $datos['puesto'] ?? null,
+            'fecha_desde' => ($datos['fecha_desde'] ?? null) ? $datos['fecha_desde'].'-01' : null,
+            'fecha_hasta' => ($datos['fecha_hasta'] ?? null) ? $datos['fecha_hasta'].'-01' : null,
+            'descripcion' => $datos['descripcion'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('candidatos.perfil')
+            ->with('ok', 'Experiencia agregada.');
+    }
+
+    // Esta función elimina una experiencia laboral
+    // En terminos tecnicos, cuando el candidato envía el formulario de eliminar, se ejecuta esta función
+    // y borra solo una experiencia de su propio perfil
+    public function destroyExperiencia(Request $request, $id)
+    {
+        $candidato = $request->user()->candidato;
+
+        if (! $candidato) {
+            abort(403);
+        }
+
+        $experiencia = $candidato->experiencias()->findOrFail($id);
+        $experiencia->delete();
+
+        return redirect()
+            ->route('candidatos.perfil')
+            ->with('ok', 'Experiencia eliminada.');
     }
 
     // Esta función muestra el perfil de la empresa logueada
