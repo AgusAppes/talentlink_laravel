@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SolicitudController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,18 +22,28 @@ Route::middleware('auth')->group(function () {
         return view('placeholder', ['titulo' => 'Dashboard']);
     })->name('dashboard');
 
-    Route::get('/solicitudes/create', function () {
-        return view('placeholder', ['titulo' => 'Nueva solicitud']);
-    })->name('solicitudes.create');
-
     Route::get('/ofertas', function () {
+        if (auth()->user()->esEmpresa()) {
+            abort(403);
+        }
+
         return view('placeholder', ['titulo' => 'Ofertas']);
     })->name('ofertas.index');
 
-    Route::view('/solicitudes', 'placeholder', ['titulo' => 'Solicitudes'])->name('solicitudes.index');
+    Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
+    Route::get('/solicitudes/nueva', [SolicitudController::class, 'create'])->name('solicitudes.create');
+    Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
+    Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])->name('solicitudes.estado');
+
     Route::view('/candidatos', 'placeholder', ['titulo' => 'Candidatos'])->name('candidatos.index');
     Route::view('/mi-perfil', 'placeholder', ['titulo' => 'Mi perfil'])->name('candidatos.perfil');
-    Route::view('/postulaciones', 'placeholder', ['titulo' => 'Postulaciones'])->name('postulaciones.index');
+    Route::get('/postulaciones', function () {
+        if (auth()->user()->esEmpresa()) {
+            abort(403);
+        }
+
+        return view('placeholder', ['titulo' => 'Postulaciones']);
+    })->name('postulaciones.index');
     Route::view('/mi-empresa', 'placeholder', ['titulo' => 'Mi empresa'])->name('empresas.perfil');
     Route::view('/usuarios', 'placeholder', ['titulo' => 'Usuarios'])->name('usuarios.index');
 });

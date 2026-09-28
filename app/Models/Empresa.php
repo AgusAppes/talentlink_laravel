@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Empresa extends Model
 {
@@ -19,5 +20,10 @@ class Empresa extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuarios_id');
+    }
+
+    public function busquedas(): HasMany
+    {
+        return $this->hasMany(Busqueda::class, 'empresas_id');
     }
 }

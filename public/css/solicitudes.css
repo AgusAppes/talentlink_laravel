@@ -1,0 +1,213 @@
+.sol-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sol-count {
+    color: var(--tl-muted-600);
+    font-size: 14px;
+}
+
+.sol-btn,
+.sol-btn-sec,
+.sol-estado button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.sol-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    color: #fff;
+    background: var(--tl-brand-700);
+    border: 0;
+    text-decoration: none;
+}
+
+.sol-btn:hover {
+    background: var(--tl-brand-600);
+}
+
+.sol-btn-sec {
+    display: inline-block;
+    padding: 8px 14px;
+    color: var(--tl-ink-700);
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+    text-decoration: none;
+}
+
+.sol-btn-sec:hover {
+    background: var(--tl-surface-0);
+}
+
+.sol-vacio {
+    margin: 0 0 8px;
+    color: var(--tl-muted-600);
+}
+
+.sol-tabla-wrap {
+    overflow-x: auto;
+}
+
+.sol-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sol-tabla th {
+    padding: 10px 12px;
+    background: var(--tl-surface-0);
+    color: var(--tl-ink-700);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.sol-tabla td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--tl-border-200);
+    vertical-align: top;
+}
+
+.sol-tabla tbody tr:hover {
+    background: #f8fafc;
+}
+
+.sol-badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sol-badge-1 {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.sol-badge-2 {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.sol-badge-3 {
+    color: #475569;
+    background: #e5e7eb;
+}
+
+.sol-estado {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.sol-estado select,
+.sol-campo input,
+.sol-campo select,
+.sol-campo textarea {
+    width: 100%;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--tl-ink-900);
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+    border-radius: 8px;
+}
+
+.sol-estado button {
+    padding: 8px 10px;
+    color: var(--tl-ink-700);
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+}
+
+.sol-estado button:hover {
+    background: var(--tl-surface-0);
+}
+
+.sol-bloque {
+    margin: 0 0 22px;
+    padding: 0;
+    border: 0;
+}
+
+.sol-bloque legend {
+    margin-bottom: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--tl-ink-900);
+}
+
+.sol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.sol-span {
+    grid-column: 1 / -1;
+}
+
+.sol-campo {
+    margin-bottom: 14px;
+}
+
+.sol-grid .sol-campo {
+    margin-bottom: 0;
+}
+
+.sol-campo label,
+.sol-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--tl-ink-700);
+    font-size: 0.92rem;
+}
+
+.sol-ayuda {
+    margin: 6px 0 0;
+    color: var(--tl-muted-600);
+    font-size: 12px;
+}
+
+.sol-error {
+    margin: 6px 0 0;
+    color: #991b1b;
+    font-size: 0.9rem;
+}
+
+.sol-checks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.sol-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--tl-ink-700);
+    font-size: 14px;
+}
+
+.sol-check input {
+    width: auto;
+}
+
+.sol-acciones {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 900px) {
+    .sol-grid {
+        grid-template-columns: 1fr;
+    }
+}
