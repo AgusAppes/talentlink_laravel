@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CandidatoController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PostulacionController;
@@ -36,7 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
     Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])->name('solicitudes.estado');
 
-    Route::view('/candidatos', 'placeholder', ['titulo' => 'Candidatos'])->name('candidatos.index');
+    Route::get('/candidatos', [CandidatoController::class, 'index'])->name('candidatos.index');
+    Route::get('/candidatos/{candidato}', [CandidatoController::class, 'show'])->name('candidatos.show');
     Route::get('/mi-perfil', [PerfilController::class, 'candidato'])->name('candidatos.perfil');
     Route::put('/mi-perfil', [PerfilController::class, 'actualizarCandidato'])->name('candidatos.perfil.update');
     Route::get('/postulaciones', [PostulacionController::class, 'index'])->name('postulaciones.index');

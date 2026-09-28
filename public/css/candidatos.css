@@ -1,0 +1,39 @@
+.can-volver {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: var(--tl-brand-700);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.can-volver:hover {
+    color: var(--tl-brand-600);
+}
+
+.can-datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    margin: 0;
+}
+
+.can-datos dt {
+    margin: 0 0 4px;
+    color: var(--tl-muted-600);
+    font-size: 0.85rem;
+}
+
+.can-datos dd {
+    margin: 0;
+    color: var(--tl-ink-900);
+}
+
+.can-bloque {
+    margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+    .can-datos {
+        grid-template-columns: 1fr;
+    }
+}

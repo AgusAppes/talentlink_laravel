@@ -28,7 +28,7 @@
         @endif
 
         @if (auth()->user()->puede('candidatos.ver'))
-            <a href="{{ route('candidatos.index') }}" class="{{ request()->routeIs('candidatos.index') ? 'active' : '' }}">Candidatos</a>
+            <a href="{{ route('candidatos.index') }}" class="{{ request()->routeIs('candidatos.index', 'candidatos.show') ? 'active' : '' }}">Candidatos</a>
         @endif
 
         @if (auth()->user()->puede('postulaciones.ver') && ! auth()->user()->esEmpresa())
