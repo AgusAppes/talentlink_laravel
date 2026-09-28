@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
 @endpush
 
 @section('content')
@@ -38,6 +39,9 @@
                             <th>Modalidad</th>
                             <th>Ubicación</th>
                             <th>Estado</th>
+                            @if (auth()->user()->esAdmin())
+                                <th>Oferta</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -82,6 +86,18 @@
                                         </form>
                                     @endif
                                 </td>
+                                @if (auth()->user()->esAdmin())
+                                    <td>
+                                        @if ($busqueda->oferta)
+                                            <span class="ofe-badge ofe-badge-{{ $busqueda->oferta->estado_ofertas_id }}">{{ $busqueda->oferta->estado->nombre }}</span>
+                                            <a href="{{ route('ofertas.edit', $busqueda->oferta) }}">Editar oferta</a>
+                                        @elseif ((int) $busqueda->estado_busqueda_id !== 3)
+                                            <a class="sol-btn" href="{{ route('ofertas.create', ['busquedas_id' => $busqueda->id]) }}">Publicar oferta</a>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

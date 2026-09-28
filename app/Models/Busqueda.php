@@ -55,4 +55,8 @@ class Busqueda extends Model
             'habilidades_id'
         );
     }
+    public function oferta(): HasOne
+    {
+        return $this->hasOne(Oferta::class, 'busquedas_id');
+    }
 }

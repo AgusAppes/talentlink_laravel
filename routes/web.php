@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\SolicitudController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,13 +23,11 @@ Route::middleware('auth')->group(function () {
         return view('placeholder', ['titulo' => 'Dashboard']);
     })->name('dashboard');
 
-    Route::get('/ofertas', function () {
-        if (auth()->user()->esEmpresa()) {
-            abort(403);
-        }
-
-        return view('placeholder', ['titulo' => 'Ofertas']);
-    })->name('ofertas.index');
+    Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
+    Route::get('/ofertas/nueva', [OfertaController::class, 'create'])->name('ofertas.create');
+    Route::post('/ofertas', [OfertaController::class, 'store'])->name('ofertas.store');
+    Route::get('/ofertas/{oferta}/editar', [OfertaController::class, 'edit'])->name('ofertas.edit');
+    Route::put('/ofertas/{oferta}', [OfertaController::class, 'update'])->name('ofertas.update');
 
     Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
     Route::get('/solicitudes/nueva', [SolicitudController::class, 'create'])->name('solicitudes.create');

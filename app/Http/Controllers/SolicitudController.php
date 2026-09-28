@@ -24,7 +24,7 @@ class SolicitudController extends Controller
         $usuario = auth()->user();
 
         $consulta = Busqueda::query()
-            ->with(['empresa', 'estado', 'detalle.modalidad', 'detalle.ciudad.provincia'])
+            ->with(['empresa', 'estado', 'detalle.modalidad', 'detalle.ciudad.provincia', 'oferta.estado'])
             ->orderByDesc('id');
 
         if ($usuario->esEmpresa()) {
