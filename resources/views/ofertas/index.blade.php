@@ -42,7 +42,12 @@
                     <tbody>
                         @foreach ($ofertas as $oferta)
                             <tr>
-                                <td>{{ $oferta->busqueda->nombre_puesto }}</td>
+                                <td>
+                                    {{ $oferta->busqueda->nombre_puesto }}
+                                    @if (auth()->user()->esAdmin() && $oferta->requiere_cv)
+                                        <span class="ofe-badge ofe-cv">Requiere CV</span>
+                                    @endif
+                                </td>
                                 @if (auth()->user()->esAdmin())
                                     <td>{{ $oferta->busqueda->empresa->nombre }}</td>
                                 @endif

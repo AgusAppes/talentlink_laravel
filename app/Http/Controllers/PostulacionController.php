@@ -7,6 +7,8 @@ use App\Models\Oferta;
 use App\Models\Postulacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class PostulacionController extends Controller
 {
@@ -51,9 +53,9 @@ class PostulacionController extends Controller
     // Esta función registra la postulación del candidato
     // En terminos tecnicos, cuando se envía el formulario de una tarjeta, se ejecuta esta función
     // y crea la postulación en etapa Pendiente de revisión
-    public function store(Oferta $oferta)
+    public function store(Request $request, Oferta $oferta)
     {
-        $candidato = auth()->user()->candidato;
+        $candidato = $request->user()->candidato;
 
         if (! $candidato) {
             abort(403);
@@ -71,10 +73,29 @@ class PostulacionController extends Controller
             return back()->with('error', 'Ya te postulaste a esta oferta.');
         }
 
-        DB::transaction(function () use ($oferta, $candidato) {
+        try {
+            $request->validate([
+                'cv' => $oferta->requiere_cv ? 'required|file|mimes:pdf|max:5120' : 'nullable',
+            ], [
+                'cv.required' => 'Esta oferta requiere que adjuntes tu CV.',
+                'cv.mimes' => 'El CV debe ser un archivo PDF.',
+                'cv.max' => 'El CV no puede superar los 5 MB.',
+            ]);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->validator)->with('cv_oferta', $oferta->id);
+        }
+
+        $rutaCv = null;
+
+        if ($oferta->requiere_cv) {
+            $rutaCv = $request->file('cv')->store('cvs', 'local');
+        }
+
+        DB::transaction(function () use ($oferta, $candidato, $rutaCv) {
             $postulacion = Postulacion::create([
                 'ofertas_id' => $oferta->id,
                 'etapas_id' => 1,
+                'cv' => $rutaCv,
             ]);
 
             $postulacion->candidatos()->attach($candidato->id);
@@ -102,5 +123,17 @@ class PostulacionController extends Controller
         ]);
 
         return back()->with('ok', 'Etapa actualizada.');
+    }
+
+    // Esta función muestra el CV de una postulación
+    // En terminos tecnicos, cuando el admin abre /postulaciones/{id}/cv, se ejecuta esta función
+    // y devuelve el PDF guardado en storage/app/private/cvs/{id}.pdf
+    public function cv($id)
+    {
+        $postulacion = Postulacion::findOrFail($id);
+
+        abort_if(! $postulacion->cv || ! Storage::disk('local')->exists($postulacion->cv), 404);
+
+        return Storage::disk('local')->response($postulacion->cv);
     }
 }

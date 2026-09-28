@@ -16,6 +16,13 @@ class Oferta extends Model
         'busquedas_id',
         'personal_rrhh_id',
         'estado_ofertas_id',
+        'requiere_cv',
+    ];
+
+    // casts es un array que permite convertir los datos de la base de datos a tipos de datos específicos
+    // en este caso, se convierte el campo requiere_cv (que viene como 0 o 1 de la base de datos) a un booleano
+    protected $casts = [
+        'requiere_cv' => 'boolean',
     ];
 
     // Esta función trae la solicitud de la oferta

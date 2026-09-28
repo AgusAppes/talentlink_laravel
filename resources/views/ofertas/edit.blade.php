@@ -30,6 +30,17 @@
                 @enderror
             </div>
 
+            <div class="sol-campo">
+                <label>
+                    <input type="checkbox" name="requiere_cv" value="1" @checked(old('requiere_cv', $oferta->requiere_cv))>
+                    Requerir CV
+                </label>
+                <p class="sol-ayuda">Si lo marcás, el candidato deberá adjuntar su CV en PDF para postularse.</p>
+                @error('requiere_cv')
+                    <p class="sol-error">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="sol-acciones">
                 <button class="sol-btn" type="submit">Guardar</button>
                 <a class="sol-btn-sec" href="{{ route('ofertas.index') }}">Cancelar</a>

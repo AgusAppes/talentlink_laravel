@@ -30,6 +30,7 @@
                             <th>Empresa</th>
                             <th>Estado de la oferta</th>
                             <th>Etapa</th>
+                            <th>CV</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,6 +62,13 @@
                                         </select>
                                         <button type="submit">Guardar</button>
                                     </form>
+                                </td>
+                                <td>
+                                    @if ($postulacion->cv)
+                                        <a href="{{ route('postulaciones.cv', $postulacion->id) }}" target="_blank">Ver CV</a>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

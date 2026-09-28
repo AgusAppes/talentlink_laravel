@@ -15,6 +15,7 @@ class Postulacion extends Model
     protected $fillable = [
         'ofertas_id',
         'etapas_id',
+        'cv',
     ];
 
     // Esta función trae la oferta de la postulación

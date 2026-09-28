@@ -21,6 +21,17 @@
     background: #e5e7eb;
 }
 
+.ofe-cv {
+    display: inline-block;
+    margin-top: 6px;
+    color: var(--tl-brand-700);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.ofe-cv-fila {
+    margin: 12px 0 0;
+}
+
 .ofe-feed {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

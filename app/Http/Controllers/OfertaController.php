@@ -99,12 +99,14 @@ class OfertaController extends Controller
         $datos = $request->validate([
             'busquedas_id' => ['required', 'exists:busquedas,id', 'unique:ofertas,busquedas_id'],
             'estado_ofertas_id' => ['required', 'exists:estado_ofertas,id'],
+            'requiere_cv' => ['nullable', 'boolean'],
         ], [
             'busquedas_id.required' => 'La solicitud es obligatoria.',
             'busquedas_id.exists' => 'La solicitud seleccionada no es válida.',
             'busquedas_id.unique' => 'Esa solicitud ya tiene una oferta publicada.',
             'estado_ofertas_id.required' => 'El estado es obligatorio.',
             'estado_ofertas_id.exists' => 'El estado seleccionado no es válido.',
+            'requiere_cv.boolean' => 'La opción de requerir CV no es válida.',
         ]);
 
         $busqueda = Busqueda::query()->findOrFail($datos['busquedas_id']);
@@ -115,11 +117,12 @@ class OfertaController extends Controller
                 ->withErrors(['busquedas_id' => 'No se puede publicar una solicitud cerrada.']);
         }
 
-        DB::transaction(function () use ($datos, $rrhh, $busqueda) {
+        DB::transaction(function () use ($datos, $rrhh, $busqueda, $request) {
             Oferta::create([
                 'busquedas_id' => $datos['busquedas_id'],
                 'personal_rrhh_id' => $rrhh->id,
                 'estado_ofertas_id' => $datos['estado_ofertas_id'],
+                'requiere_cv' => $request->boolean('requiere_cv'),
             ]);
 
             $busqueda->update([
@@ -152,6 +155,7 @@ class OfertaController extends Controller
     {
         $datos = $request->validate([
             'estado_ofertas_id' => ['required', 'exists:estado_ofertas,id'],
+            'requiere_cv' => ['nullable', 'boolean'],
         ], [
             'estado_ofertas_id.required' => 'El estado es obligatorio.',
             'estado_ofertas_id.exists' => 'El estado seleccionado no es válido.',
@@ -159,6 +163,7 @@ class OfertaController extends Controller
 
         $oferta->update([
             'estado_ofertas_id' => $datos['estado_ofertas_id'],
+            'requiere_cv' => $request->boolean('requiere_cv'),
         ]);
 
         return redirect()

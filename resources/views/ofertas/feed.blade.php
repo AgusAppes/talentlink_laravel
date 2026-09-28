@@ -47,8 +47,25 @@
                             @endforeach
                         </ul>
                     @endif
+                    @if ($oferta->requiere_cv)
+                        <p class="ofe-cv-fila"><span class="ofe-badge ofe-cv">Requiere CV</span></p>
+                    @endif
                     @if ($postuladas->contains($oferta->id))
                         <p class="pos-ya">Ya te postulaste</p>
+                    @elseif ($oferta->requiere_cv)
+                        <form class="pos-postular" method="POST" action="{{ route('postulaciones.store', $oferta) }}" enctype="multipart/form-data">
+                            @csrf
+                            <div class="sol-campo">
+                                <label for="cv-{{ $oferta->id }}">Adjuntá tu CV (PDF, máx. 5 MB)</label>
+                                <input id="cv-{{ $oferta->id }}" type="file" name="cv" accept="application/pdf" required>
+                                @if ((string) session('cv_oferta') === (string) $oferta->id)
+                                    @error('cv')
+                                        <p class="sol-error">{{ $message }}</p>
+                                    @enderror
+                                @endif
+                            </div>
+                            <button class="sol-btn" type="submit">Postularme</button>
+                        </form>
                     @else
                         <form class="pos-postular" method="POST" action="{{ route('postulaciones.store', $oferta) }}">
                             @csrf

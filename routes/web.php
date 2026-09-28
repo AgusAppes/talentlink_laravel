@@ -69,6 +69,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permiso:postulaciones.ver')
         ->name('postulaciones.index');
 
+    Route::get('/postulaciones/{id}/cv', [PostulacionController::class, 'cv'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.cv');
+
     Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])
         ->middleware('permiso:postulaciones.crear')
         ->name('postulaciones.store');
