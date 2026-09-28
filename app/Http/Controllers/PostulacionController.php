@@ -7,7 +7,6 @@ use App\Models\Oferta;
 use App\Models\Postulacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class PostulacionController extends Controller
 {
@@ -16,8 +15,6 @@ class PostulacionController extends Controller
     // y sirve el listado del candidato o la tabla del admin
     public function index()
     {
-        Gate::authorize('viewAny', Postulacion::class);
-
         $usuario = auth()->user();
 
         if ($usuario->esCandidato()) {
@@ -56,8 +53,6 @@ class PostulacionController extends Controller
     // y crea la postulación en etapa Pendiente de revisión
     public function store(Oferta $oferta)
     {
-        Gate::authorize('create', Postulacion::class);
-
         $candidato = auth()->user()->candidato;
 
         if (! $candidato) {
@@ -95,8 +90,6 @@ class PostulacionController extends Controller
     // y actualiza etapas_id
     public function cambiarEtapa(Request $request, Postulacion $postulacion)
     {
-        Gate::authorize('cambiarEtapa', $postulacion);
-
         $datos = $request->validate([
             'etapas_id' => ['required', 'exists:etapas,id'],
         ], [

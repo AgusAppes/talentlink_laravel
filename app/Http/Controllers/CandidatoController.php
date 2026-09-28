@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Candidato;
-use Illuminate\Support\Facades\Gate;
 
 class CandidatoController extends Controller
 {
@@ -12,8 +11,6 @@ class CandidatoController extends Controller
     // y trae cada candidato con su usuario, ciudad y cantidad de postulaciones
     public function index()
     {
-        Gate::authorize('viewAny', Candidato::class);
-
         $candidatos = Candidato::query()
             ->with(['usuario', 'ciudad.provincia'])
             ->withCount('postulaciones')
@@ -29,8 +26,6 @@ class CandidatoController extends Controller
     // y trae sus datos y las postulaciones, de la más reciente a la más vieja
     public function show(Candidato $candidato)
     {
-        Gate::authorize('view', $candidato);
-
         $candidato->load([
             'usuario',
             'ciudad.provincia',

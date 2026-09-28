@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Ciudad;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class PerfilController extends Controller
 {
@@ -16,8 +15,6 @@ class PerfilController extends Controller
         if (! $candidato) {
             abort(403);
         }
-
-        Gate::authorize('update', $candidato);
 
         $candidato->load('ciudad.provincia');
 
@@ -42,8 +39,6 @@ class PerfilController extends Controller
         if (! $candidato) {
             abort(403);
         }
-
-        Gate::authorize('update', $candidato);
 
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:45'],
@@ -81,8 +76,6 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        Gate::authorize('update', $empresa);
-
         return view('perfiles.empresa', compact('empresa'));
     }
 
@@ -96,8 +89,6 @@ class PerfilController extends Controller
         if (! $empresa) {
             abort(403);
         }
-
-        Gate::authorize('update', $empresa);
 
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:100'],

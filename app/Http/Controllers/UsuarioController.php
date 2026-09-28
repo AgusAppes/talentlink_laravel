@@ -7,7 +7,6 @@ use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
@@ -17,8 +16,6 @@ class UsuarioController extends Controller
     // y trae cada usuario con su rol y su perfil para armar el nombre
     public function index()
     {
-        Gate::authorize('viewAny', User::class);
-
         $usuarios = User::query()
             ->with(['rol', 'empresa', 'candidato', 'personalRrhh'])
             ->orderBy('roles_id')
@@ -33,8 +30,6 @@ class UsuarioController extends Controller
     // y sirve el formulario de Personal RRHH o Empresa
     public function create()
     {
-        Gate::authorize('create', User::class);
-
         return view('usuarios.create');
     }
 
@@ -43,8 +38,6 @@ class UsuarioController extends Controller
     // y guarda el usuario junto con personal_rrhh o empresas en una sola transacción
     public function store(Request $request)
     {
-        Gate::authorize('create', User::class);
-
         $datos = $request->validate([
             'roles_id' => ['required', 'in:1,2'],
             'correo' => ['required', 'email', 'max:100', 'unique:usuarios,correo'],
@@ -102,8 +95,6 @@ class UsuarioController extends Controller
     // y cuenta usuarios y permisos de cada rol
     public function roles()
     {
-        Gate::authorize('viewAny', User::class);
-
         $roles = Rol::query()
             ->withCount(['usuarios', 'permisos'])
             ->orderBy('id')
@@ -117,8 +108,6 @@ class UsuarioController extends Controller
     // y trae los permisos del rol y el catálogo completo
     public function editarPermisos(Rol $rol)
     {
-        Gate::authorize('gestionarPermisos', User::class);
-
         $rol->load('permisos');
 
         $permisos = Permiso::query()->orderBy('nombre')->get();
@@ -131,8 +120,6 @@ class UsuarioController extends Controller
     // y sincroniza la tabla permisos_por_roles, sin quitarle al admin usuarios.ver ni usuarios.administrar
     public function actualizarPermisos(Request $request, Rol $rol)
     {
-        Gate::authorize('gestionarPermisos', User::class);
-
         $datos = $request->validate([
             'permisos' => ['nullable', 'array'],
             'permisos.*' => ['integer', 'exists:permisos,id'],

@@ -24,33 +24,72 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/metricas', [DashboardController::class, 'metricas'])->name('dashboard.metricas');
+    Route::middleware('permiso:dashboard.ver')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/metricas', [DashboardController::class, 'metricas'])->name('dashboard.metricas');
+    });
 
-    Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
-    Route::get('/ofertas/nueva', [OfertaController::class, 'create'])->name('ofertas.create');
-    Route::post('/ofertas', [OfertaController::class, 'store'])->name('ofertas.store');
-    Route::get('/ofertas/{oferta}/editar', [OfertaController::class, 'edit'])->name('ofertas.edit');
-    Route::put('/ofertas/{oferta}', [OfertaController::class, 'update'])->name('ofertas.update');
+    Route::middleware('permiso:ofertas.ver')->group(function () {
+        Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
+    });
 
-    Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
-    Route::get('/solicitudes/nueva', [SolicitudController::class, 'create'])->name('solicitudes.create');
-    Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
-    Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])->name('solicitudes.estado');
+    Route::middleware('permiso:ofertas.crear')->group(function () {
+        Route::get('/ofertas/nueva', [OfertaController::class, 'create'])->name('ofertas.create');
+        Route::post('/ofertas', [OfertaController::class, 'store'])->name('ofertas.store');
+        Route::get('/ofertas/{oferta}/editar', [OfertaController::class, 'edit'])->name('ofertas.edit');
+        Route::put('/ofertas/{oferta}', [OfertaController::class, 'update'])->name('ofertas.update');
+    });
 
-    Route::get('/candidatos', [CandidatoController::class, 'index'])->name('candidatos.index');
-    Route::get('/candidatos/{candidato}', [CandidatoController::class, 'show'])->name('candidatos.show');
-    Route::get('/mi-perfil', [PerfilController::class, 'candidato'])->name('candidatos.perfil');
-    Route::put('/mi-perfil', [PerfilController::class, 'actualizarCandidato'])->name('candidatos.perfil.update');
-    Route::get('/postulaciones', [PostulacionController::class, 'index'])->name('postulaciones.index');
-    Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])->name('postulaciones.store');
-    Route::patch('/postulaciones/{postulacion}/etapa', [PostulacionController::class, 'cambiarEtapa'])->name('postulaciones.etapa');
-    Route::get('/mi-empresa', [PerfilController::class, 'empresa'])->name('empresas.perfil');
-    Route::put('/mi-empresa', [PerfilController::class, 'actualizarEmpresa'])->name('empresas.perfil.update');
-    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::get('/usuarios/nuevo', [UsuarioController::class, 'create'])->name('usuarios.create');
-    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
-    Route::get('/roles', [UsuarioController::class, 'roles'])->name('usuarios.roles');
-    Route::get('/roles/{rol}/permisos', [UsuarioController::class, 'editarPermisos'])->name('usuarios.roles.edit');
-    Route::put('/roles/{rol}/permisos', [UsuarioController::class, 'actualizarPermisos'])->name('usuarios.roles.update');
+    Route::middleware('permiso:solicitudes.ver|solicitudes.crear')->group(function () {
+        Route::get('/solicitudes', [SolicitudController::class, 'index'])->name('solicitudes.index');
+    });
+
+    Route::middleware('permiso:solicitudes.crear')->group(function () {
+        Route::get('/solicitudes/nueva', [SolicitudController::class, 'create'])->name('solicitudes.create');
+        Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
+    });
+
+    Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])
+        ->middleware('permiso:solicitudes.editar')
+        ->name('solicitudes.estado');
+
+    Route::middleware('permiso:candidatos.ver')->group(function () {
+        Route::get('/candidatos', [CandidatoController::class, 'index'])->name('candidatos.index');
+        Route::get('/candidatos/{candidato}', [CandidatoController::class, 'show'])->name('candidatos.show');
+    });
+
+    Route::middleware('permiso:candidatos.editar')->group(function () {
+        Route::get('/mi-perfil', [PerfilController::class, 'candidato'])->name('candidatos.perfil');
+        Route::put('/mi-perfil', [PerfilController::class, 'actualizarCandidato'])->name('candidatos.perfil.update');
+    });
+
+    // La empresa tiene postulaciones.ver, pero esa pantalla no es de ella.
+    Route::get('/postulaciones', [PostulacionController::class, 'index'])
+        ->middleware('permiso:postulaciones.ver,empresa')
+        ->name('postulaciones.index');
+
+    Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])
+        ->middleware('permiso:postulaciones.crear')
+        ->name('postulaciones.store');
+
+    Route::patch('/postulaciones/{postulacion}/etapa', [PostulacionController::class, 'cambiarEtapa'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.etapa');
+
+    Route::middleware('permiso:empresas.editar')->group(function () {
+        Route::get('/mi-empresa', [PerfilController::class, 'empresa'])->name('empresas.perfil');
+        Route::put('/mi-empresa', [PerfilController::class, 'actualizarEmpresa'])->name('empresas.perfil.update');
+    });
+
+    Route::middleware('permiso:usuarios.ver')->group(function () {
+        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+        Route::get('/roles', [UsuarioController::class, 'roles'])->name('usuarios.roles');
+    });
+
+    Route::middleware('permiso:usuarios.administrar')->group(function () {
+        Route::get('/usuarios/nuevo', [UsuarioController::class, 'create'])->name('usuarios.create');
+        Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+        Route::get('/roles/{rol}/permisos', [UsuarioController::class, 'editarPermisos'])->name('usuarios.roles.edit');
+        Route::put('/roles/{rol}/permisos', [UsuarioController::class, 'actualizarPermisos'])->name('usuarios.roles.update');
+    });
 });

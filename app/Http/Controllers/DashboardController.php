@@ -7,17 +7,14 @@ use App\Models\Candidato;
 use App\Models\Empresa;
 use App\Models\Oferta;
 use App\Models\Postulacion;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     // Esta función muestra el dashboard del admin
     // En terminos tecnicos, cuando se visita /dashboard, se ejecuta esta función
     // y sirve dashboard/index.blade.php con las cinco métricas
-    public function index(Request $request)
+    public function index()
     {
-        abort_unless($request->user()->puede('dashboard.ver'), 403);
-
         return view('dashboard.index', [
             'metricas' => $this->calcularMetricas(),
         ]);
@@ -26,10 +23,8 @@ class DashboardController extends Controller
     // Esta función devuelve las métricas en JSON
     // En terminos tecnicos, cuando el dashboard pide /dashboard/metricas, se ejecuta esta función
     // y responde con los cinco conteos para actualizar las tarjetas
-    public function metricas(Request $request)
+    public function metricas()
     {
-        abort_unless($request->user()->puede('dashboard.ver'), 403);
-
         return response()->json($this->calcularMetricas());
     }
 

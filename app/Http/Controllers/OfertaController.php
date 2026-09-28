@@ -7,7 +7,6 @@ use App\Models\EstadoOferta;
 use App\Models\Oferta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class OfertaController extends Controller
 {
@@ -16,8 +15,6 @@ class OfertaController extends Controller
     // y sirve el feed del candidato o la tabla de admin y empresa
     public function index()
     {
-        Gate::authorize('viewAny', Oferta::class);
-
         $usuario = auth()->user();
 
         if ($usuario->esCandidato()) {
@@ -70,8 +67,6 @@ class OfertaController extends Controller
     // y sirve ofertas/create.blade.php con las solicitudes que todavía no tienen oferta
     public function create(Request $request)
     {
-        Gate::authorize('create', Oferta::class);
-
         if (! $request->user()->personalRrhh) {
             abort(403);
         }
@@ -95,8 +90,6 @@ class OfertaController extends Controller
     // y crea la oferta y pasa la solicitud a En oferta dentro de una transacción
     public function store(Request $request)
     {
-        Gate::authorize('create', Oferta::class);
-
         $rrhh = $request->user()->personalRrhh;
 
         if (! $rrhh) {
@@ -144,8 +137,6 @@ class OfertaController extends Controller
     // y sirve ofertas/edit.blade.php con el puesto y los estados
     public function edit(Oferta $oferta)
     {
-        Gate::authorize('update', $oferta);
-
         $oferta->load('busqueda.empresa');
 
         return view('ofertas.edit', [
@@ -159,8 +150,6 @@ class OfertaController extends Controller
     // y actualiza estado_ofertas_id
     public function update(Request $request, Oferta $oferta)
     {
-        Gate::authorize('update', $oferta);
-
         $datos = $request->validate([
             'estado_ofertas_id' => ['required', 'exists:estado_ofertas,id'],
         ], [

@@ -10,7 +10,6 @@ use App\Models\Modalidad;
 use App\Models\Provincia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class SolicitudController extends Controller
 {
@@ -19,8 +18,6 @@ class SolicitudController extends Controller
     // y sirve solicitudes/index.blade.php con las búsquedas del admin o de la empresa
     public function index()
     {
-        Gate::authorize('viewAny', Busqueda::class);
-
         $usuario = auth()->user();
 
         $consulta = Busqueda::query()
@@ -44,8 +41,6 @@ class SolicitudController extends Controller
     // y sirve solicitudes/create.blade.php con modalidades, habilidades, provincias y ciudades
     public function create()
     {
-        Gate::authorize('create', Busqueda::class);
-
         if (! auth()->user()->empresa) {
             abort(403);
         }
@@ -70,8 +65,6 @@ class SolicitudController extends Controller
     // y crea la búsqueda, el detalle y las habilidades dentro de una transacción
     public function store(Request $request)
     {
-        Gate::authorize('create', Busqueda::class);
-
         $empresa = $request->user()->empresa;
 
         if (! $empresa) {
@@ -168,8 +161,6 @@ class SolicitudController extends Controller
     // y actualiza estado_busqueda_id
     public function cambiarEstado(Request $request, Busqueda $busqueda)
     {
-        Gate::authorize('cambiarEstado', $busqueda);
-
         $datos = $request->validate([
             'estado_busqueda_id' => ['required', 'exists:estado_busqueda,id'],
         ], [
