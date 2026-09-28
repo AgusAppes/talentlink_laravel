@@ -2,48 +2,58 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    protected $table = 'usuarios';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    public $timestamps = false;
+
+    protected $rememberTokenName = '';
+
     protected $fillable = [
-        'name',
-        'email',
+        'roles_id',
+        'correo',
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function rol(): BelongsTo
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Rol::class, 'roles_id');
+    }
+
+    public function candidato(): HasOne
+    {
+        return $this->hasOne(Candidato::class, 'usuarios_id');
+    }
+
+    // Verifica si el usuario tiene el permiso especificado
+    public function puede(string $permiso): bool
+    {
+        return $this->rol->permisos->contains('nombre', $permiso);
+    }
+
+
+    // Estas tres funciones son para verificar el rol del usuario
+    public function esAdmin(): bool
+    {
+        return (int) $this->roles_id === 1;
+    }
+
+    public function esEmpresa(): bool
+    {
+        return (int) $this->roles_id === 2;
+    }
+
+    public function esCandidato(): bool
+    {
+        return (int) $this->roles_id === 3;
     }
 }
