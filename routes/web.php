@@ -63,9 +63,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/mi-perfil', [PerfilController::class, 'actualizarCandidato'])->name('candidatos.perfil.update');
     });
 
-    // La empresa tiene postulaciones.ver, pero esa pantalla no es de ella.
     Route::get('/postulaciones', [PostulacionController::class, 'index'])
-        ->middleware('permiso:postulaciones.ver,empresa')
+        ->middleware('permiso:postulaciones.ver')
         ->name('postulaciones.index');
 
     Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])

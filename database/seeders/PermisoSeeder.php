@@ -44,8 +44,6 @@ class PermisoSeeder extends Seeder
             $rolEmpresa => [
                 'solicitudes.crear',
                 'empresas.editar',
-                'ofertas.ver',
-                'postulaciones.ver',
             ],
             $rolCandidato => [
                 'candidatos.editar',

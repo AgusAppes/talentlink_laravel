@@ -8,18 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class VerificarPermiso
 {
-    // Revisa el permiso en la ruta. Si vienen varios separados por |, alcanza con uno.
-    // El segundo argumento, si es "empresa", deja afuera a ese rol aunque tenga el permiso.
-    public function handle(Request $request, Closure $next, string $permisos, string $excluir = ''): Response
+    // Esta función revisa el permiso de la ruta
+    // En terminos tecnicos, cuando se entra a una ruta con el middleware permiso, se ejecuta esta función
+    // y deja pasar si el usuario tiene alguno de los permisos separados por |
+    public function handle(Request $request, Closure $next, string $permisos): Response
     {
-        $usuario = $request->user();
-
-        if ($excluir === 'empresa' && $usuario->esEmpresa()) {
-            abort(403);
-        }
-
         foreach (explode('|', $permisos) as $permiso) {
-            if ($usuario->puede($permiso)) {
+            if ($request->user()->puede($permiso)) {
                 return $next($request);
             }
         }

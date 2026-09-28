@@ -21,7 +21,7 @@
             <a href="{{ route('solicitudes.create') }}" class="{{ request()->routeIs('solicitudes.create') ? 'active' : '' }}">Nueva solicitud</a>
         @endif
 
-        @if (auth()->user()->puede('ofertas.ver') && ! auth()->user()->esEmpresa())
+        @if (auth()->user()->puede('ofertas.ver'))
             <a href="{{ route('ofertas.index') }}" class="{{ request()->routeIs('ofertas.*') ? 'active' : '' }}">
                 {{ auth()->user()->esCandidato() ? 'Ofertas disponibles' : 'Ofertas laborales' }}
             </a>
@@ -31,7 +31,7 @@
             <a href="{{ route('candidatos.index') }}" class="{{ request()->routeIs('candidatos.index', 'candidatos.show') ? 'active' : '' }}">Candidatos</a>
         @endif
 
-        @if (auth()->user()->puede('postulaciones.ver') && ! auth()->user()->esEmpresa())
+        @if (auth()->user()->puede('postulaciones.ver'))
             <a href="{{ route('postulaciones.index') }}" class="{{ request()->routeIs('postulaciones.*') ? 'active' : '' }}">
                 {{ auth()->user()->esCandidato() ? 'Mis postulaciones' : 'Postulaciones' }}
             </a>
