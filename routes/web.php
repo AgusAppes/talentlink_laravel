@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CandidatoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PostulacionController;
@@ -23,9 +24,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return view('placeholder', ['titulo' => 'Dashboard']);
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/metricas', [DashboardController::class, 'metricas'])->name('dashboard.metricas');
 
     Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
     Route::get('/ofertas/nueva', [OfertaController::class, 'create'])->name('ofertas.create');

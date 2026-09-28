@@ -35,5 +35,7 @@
             </div>
         </div>
     </div>
+    {{-- Espacio para JavaScript de una pantalla puntual. --}}
+    @stack('scripts')
 </body>
 </html>

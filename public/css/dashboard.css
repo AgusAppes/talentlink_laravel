@@ -1,0 +1,50 @@
+.dash-saludo {
+    margin: 0 0 16px;
+    color: var(--tl-ink-900);
+    font-size: 1.15rem;
+}
+
+.dash-grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.dash-tarjeta {
+    padding: 16px;
+    background: var(--tl-surface-1);
+    border: 1px solid var(--tl-border-200);
+    border-radius: 12px;
+}
+
+.dash-etiqueta {
+    margin: 0 0 8px;
+    color: var(--tl-muted-600);
+    font-size: 14px;
+}
+
+.dash-numero {
+    display: block;
+    margin: 0 0 12px;
+    color: var(--tl-brand-700);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dash-ver {
+    color: var(--tl-brand-700);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dash-ver:hover {
+    color: var(--tl-brand-600);
+}
+
+.dash-hora {
+    margin: 16px 0 0;
+    color: var(--tl-muted-600);
+    font-size: 13px;
+}
