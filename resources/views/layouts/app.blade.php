@@ -17,7 +17,7 @@
         {{-- Menú lateral con los accesos según el rol. --}}
         @include('partials.sidebar')
         <div class="tl-main">
-            {{-- Barra superior: título de la página, usuario y botón Salir. --}}
+            {{-- Barra superior: título de la página y menú del avatar. --}}
             @include('partials.navbar')
             <div class="tl-content">
                 {{-- Aviso verde cuando un controlador guardó el mensaje en session('ok'). --}}
@@ -37,5 +37,14 @@
     </div>
     {{-- Espacio para JavaScript de una pantalla puntual. --}}
     @stack('scripts')
+    <script>
+        document.addEventListener('click', function (evento) {
+            var menu = document.querySelector('.tl-menu[open]');
+
+            if (menu && ! menu.contains(evento.target)) {
+                menu.removeAttribute('open');
+            }
+        });
+    </script>
 </body>
 </html>
