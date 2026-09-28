@@ -16,7 +16,11 @@ class CandidatoController extends Controller
             ->withCount('postulaciones')
             ->orderBy('apellido')
             ->orderBy('nombre')
-            ->get();
+            ->paginate(10)
+            // withQueryString() es una función que permite mantener los parámetros de la URL al paginar
+            // por ejemplo, si se está en la página 2 de la lista de candidatos, al paginar se mantendrá la página 2 en la URL
+            // o si se está filtrando por ciudad, al paginar se mantendrá el filtro de ciudad en la URL
+            ->withQueryString();
 
         return view('candidatos.index', compact('candidatos'));
     }

@@ -9,7 +9,7 @@
 
 @section('content')
     <div class="sol-toolbar">
-        <span class="sol-count">{{ $busquedas->count() }} {{ $busquedas->count() === 1 ? 'solicitud' : 'solicitudes' }}</span>
+        <span class="sol-count">{{ $busquedas->total() }} {{ $busquedas->total() === 1 ? 'solicitud' : 'solicitudes' }}</span>
         @if (auth()->user()->esEmpresa())
             <a class="sol-btn" href="{{ route('solicitudes.create') }}">Nueva solicitud</a>
         @endif
@@ -103,6 +103,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $busquedas->links('partials.paginacion') }}
         @endif
     </section>
 @endsection

@@ -9,6 +9,10 @@
 @endpush
 
 @section('content')
+    <div class="sol-toolbar">
+        <a class="sol-btn-sec" href="{{ route('password.edit') }}">Cambiar contraseña</a>
+    </div>
+
     <section class="tl-card">
         <div class="per-lectura">
             <p><span>Correo</span>{{ auth()->user()->correo }}</p>

@@ -9,6 +9,7 @@
             <span class="tl-user-name">{{ auth()->user()->nombreVisible() }}</span>
             <span class="tl-user-rol">{{ auth()->user()->rolLegible() }}</span>
         </div>
+        <a class="tl-salir" href="{{ route('password.edit') }}">Cambiar contraseña</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="tl-salir" type="submit">Salir</button>

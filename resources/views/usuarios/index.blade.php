@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="sol-toolbar">
-        <span class="sol-count">{{ $usuarios->count() }} {{ $usuarios->count() === 1 ? 'usuario' : 'usuarios' }}</span>
+        <span class="sol-count">{{ $usuarios->total() }} {{ $usuarios->total() === 1 ? 'usuario' : 'usuarios' }}</span>
         @if (auth()->user()->puede('usuarios.administrar'))
             <a class="sol-btn" href="{{ route('usuarios.create') }}">Nuevo usuario</a>
         @endif
@@ -40,6 +40,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $usuarios->links('partials.paginacion') }}
         @endif
     </section>
 @endsection

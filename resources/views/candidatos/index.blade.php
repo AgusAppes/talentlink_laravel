@@ -8,7 +8,8 @@
 
 @section('content')
     <div class="sol-toolbar">
-        <span class="sol-count">{{ $candidatos->count() }} {{ $candidatos->count() === 1 ? 'candidato' : 'candidatos' }}</span>
+        // Muestra el total de candidatos con la palabra correcta (candidato o candidatos) dependiendo de la cantidad
+        <span class="sol-count">{{ $candidatos->total() }} {{ $candidatos->total() === 1 ? 'candidato' : 'candidatos' }}</span>
     </div>
 
     <section class="tl-card">
@@ -45,6 +46,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $candidatos->links('partials.paginacion') }}
         @endif
     </section>
 @endsection

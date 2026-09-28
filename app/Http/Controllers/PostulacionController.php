@@ -45,7 +45,8 @@ class PostulacionController extends Controller
                     'oferta.busqueda.empresa',
                 ])
                 ->orderByDesc('id')
-                ->get(),
+                ->paginate(10)
+                ->withQueryString(),
             'etapas' => Etapa::query()->orderBy('id')->get(),
         ]);
     }

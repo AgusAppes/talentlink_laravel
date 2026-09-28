@@ -24,6 +24,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::get('/cambiar-password', [PerfilController::class, 'editPassword'])->name('password.edit');
+    Route::put('/cambiar-password', [PerfilController::class, 'updatePassword'])->name('password.update');
+
     Route::middleware('permiso:dashboard.ver')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/metricas', [DashboardController::class, 'metricas'])->name('dashboard.metricas');

@@ -27,7 +27,8 @@ class OfertaController extends Controller
                     'busqueda.habilidades',
                 ])
                 ->orderByDesc('id')
-                ->get();
+                ->paginate(10)
+                ->withQueryString();
 
             // Se obtienen las ofertas a las que el candidato ha postulado
             $postuladas = $usuario->candidato
@@ -58,7 +59,9 @@ class OfertaController extends Controller
         }
 
         return view('ofertas.index', [
-            'ofertas' => $consulta->get(),
+            'ofertas' => $consulta
+            ->paginate(10)
+            ->withQueryString(),
         ]);
     }
 

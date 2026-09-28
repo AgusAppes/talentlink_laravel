@@ -20,7 +20,8 @@ class UsuarioController extends Controller
             ->with(['rol', 'empresa', 'candidato', 'personalRrhh'])
             ->orderBy('roles_id')
             ->orderBy('correo')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('usuarios.index', compact('usuarios'));
     }

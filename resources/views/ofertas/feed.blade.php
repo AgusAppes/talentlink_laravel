@@ -75,5 +75,6 @@
                 </article>
             @endforeach
         </div>
+        {{ $ofertas->links('partials.paginacion') }}
     @endif
 @endsection

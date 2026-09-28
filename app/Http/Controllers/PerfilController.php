@@ -6,6 +6,7 @@ use App\Models\Ciudad;
 use App\Models\Habilidad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class PerfilController extends Controller
@@ -215,5 +216,37 @@ class PerfilController extends Controller
         return redirect()
             ->route('empresas.perfil')
             ->with('ok', 'Datos de la empresa actualizados.');
+    }
+
+    // Esta función muestra el formulario para cambiar la contraseña
+    // En terminos tecnicos, cuando se visita /cambiar-password, se ejecuta esta función
+    // y sirve perfil/password.blade.php
+    public function editPassword()
+    {
+        return view('perfil.password');
+    }
+
+    // Esta función guarda la contraseña nueva
+    // En terminos tecnicos, cuando se envía el formulario de /cambiar-password, se ejecuta esta función
+    // y actualiza la contraseña del usuario logueado
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password_actual' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:password_actual'],
+        ], [
+            'password_actual.required' => 'Ingresá tu contraseña actual.',
+            'password_actual.current_password' => 'La contraseña actual no es correcta.',
+            'password.required' => 'Ingresá la nueva contraseña.',
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'La confirmación no coincide con la nueva contraseña.',
+            'password.different' => 'La nueva contraseña tiene que ser distinta de la actual.',
+        ]);
+
+        $usuario = $request->user();
+        $usuario->password = Hash::make($request->password);
+        $usuario->save();
+
+        return back()->with('ok', 'Contraseña actualizada correctamente.');
     }
 }

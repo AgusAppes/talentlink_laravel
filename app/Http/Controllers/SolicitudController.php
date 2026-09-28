@@ -29,7 +29,9 @@ class SolicitudController extends Controller
         }
 
         return view('solicitudes.index', [
-            'busquedas' => $consulta->get(),
+            'busquedas' => $consulta
+            ->paginate(10)
+            ->withQueryString(),
             'estados' => $usuario->esAdmin()
                 ? EstadoBusqueda::query()->orderBy('id')->get()
                 : collect(),

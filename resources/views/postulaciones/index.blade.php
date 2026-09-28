@@ -10,7 +10,7 @@
 
 @section('content')
     <div class="sol-toolbar">
-        <span class="sol-count">{{ $postulaciones->count() }} {{ $postulaciones->count() === 1 ? 'postulación' : 'postulaciones' }}</span>
+        <span class="sol-count">{{ $postulaciones->total() }} {{ $postulaciones->total() === 1 ? 'postulación' : 'postulaciones' }}</span>
     </div>
 
     <section class="tl-card">
@@ -75,6 +75,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $postulaciones->links('partials.paginacion') }}
         @endif
     </section>
 @endsection

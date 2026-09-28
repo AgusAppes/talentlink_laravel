@@ -9,7 +9,7 @@
 
 @section('content')
     <div class="sol-toolbar">
-        <span class="sol-count">{{ $ofertas->count() }} {{ $ofertas->count() === 1 ? 'oferta' : 'ofertas' }}</span>
+        <span class="sol-count">{{ $ofertas->total() }} {{ $ofertas->total() === 1 ? 'oferta' : 'ofertas' }}</span>
         @if (auth()->user()->esAdmin())
             <a class="sol-btn" href="{{ route('ofertas.create') }}">Publicar oferta</a>
         @endif
@@ -76,6 +76,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $ofertas->links('partials.paginacion') }}
         @endif
     </section>
 @endsection
