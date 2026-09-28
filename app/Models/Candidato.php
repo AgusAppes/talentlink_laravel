@@ -20,6 +20,13 @@ class Candidato extends Model
         'ciudades_id',
     ];
 
+    // Esta función convierte el campo fecha_nac a un objeto DateTime
+    // Esto es para que se pueda usar en el formulario de edición de perfil
+    // En palabras simples, recibimos el campo fecha_nac de la base de datos como texto y lo convertimos a un objeto Date de Laravel
+    protected $casts = [
+        'fecha_nac' => 'date',
+    ];
+
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuarios_id');

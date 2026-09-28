@@ -1,0 +1,21 @@
+.per-lectura {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--tl-surface-0);
+    border-radius: 8px;
+}
+
+.per-lectura p {
+    margin: 0 0 10px;
+    color: var(--tl-muted-600);
+}
+
+.per-lectura p:last-child {
+    margin-bottom: 0;
+}
+
+.per-lectura span {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.85rem;
+}
