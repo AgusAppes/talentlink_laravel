@@ -49,7 +49,8 @@
     @if (auth()->user()->puede('usuarios.ver'))
         <p class="tl-section">Reportes</p>
         <nav class="tl-nav">
-            <a href="{{ route('usuarios.index') }}" class="{{ request()->routeIs('usuarios.*') ? 'active' : '' }}">Usuarios</a>
+            <a href="{{ route('usuarios.index') }}" class="{{ request()->routeIs('usuarios.index', 'usuarios.create') ? 'active' : '' }}">Usuarios</a>
+            <a class="tl-sub {{ request()->routeIs('usuarios.roles', 'usuarios.roles.edit') ? 'active' : '' }}" href="{{ route('usuarios.roles') }}">Roles y permisos</a>
         </nav>
     @endif
 </aside>
