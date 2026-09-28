@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Oferta extends Model
 {
@@ -39,5 +40,13 @@ class Oferta extends Model
     public function estado(): BelongsTo
     {
         return $this->belongsTo(EstadoOferta::class, 'estado_ofertas_id');
+    }
+
+    // Esta función trae las postulaciones de la oferta
+    // En terminos tecnicos, cuando se revisa si el candidato ya se postuló, se ejecuta esta función
+    // y busca las filas de postulaciones con este ofertas_id
+    public function postulaciones(): HasMany
+    {
+        return $this->hasMany(Postulacion::class, 'ofertas_id');
     }
 }

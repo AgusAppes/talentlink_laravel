@@ -3,7 +3,9 @@
 @section('title', 'Ofertas disponibles')
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/postulaciones.css') }}">
 @endpush
 
 @section('content')
@@ -44,6 +46,14 @@
                                 <li>{{ $habilidad->nombre }}</li>
                             @endforeach
                         </ul>
+                    @endif
+                    @if ($postuladas->contains($oferta->id))
+                        <p class="pos-ya">Ya te postulaste</p>
+                    @else
+                        <form class="pos-postular" method="POST" action="{{ route('postulaciones.store', $oferta) }}">
+                            @csrf
+                            <button class="sol-btn" type="submit">Postularme</button>
+                        </form>
                     @endif
                 </article>
             @endforeach

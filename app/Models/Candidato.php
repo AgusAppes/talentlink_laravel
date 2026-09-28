@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Candidato extends Model
 {
@@ -27,5 +28,18 @@ class Candidato extends Model
     public function ciudad(): BelongsTo
     {
         return $this->belongsTo(Ciudad::class, 'ciudades_id');
+    }
+
+    // Esta función trae las postulaciones del candidato
+    // En terminos tecnicos, cuando el listado o el feed buscan sus postulaciones, se ejecuta esta función
+    // y usa la tabla postulaciones_por_candidatos
+    public function postulaciones(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Postulacion::class,
+            'postulaciones_por_candidatos',
+            'candidatos_id',
+            'postulaciones_id'
+        );
     }
 }

@@ -1,0 +1,43 @@
+.pos-badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pos-badge-1 {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.pos-badge-2 {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.pos-badge-3 {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.pos-badge-4 {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.pos-postular {
+    margin-top: 14px;
+}
+
+.pos-ya {
+    display: inline-block;
+    margin: 14px 0 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: #166534;
+    background: #dcfce7;
+    font-size: 14px;
+    font-weight: 600;
+}

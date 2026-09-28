@@ -32,7 +32,12 @@ class OfertaController extends Controller
                 ->orderByDesc('id')
                 ->get();
 
-            return view('ofertas.feed', compact('ofertas'));
+            // Se obtienen las ofertas a las que el candidato ha postulado
+            $postuladas = $usuario->candidato
+                ? $usuario->candidato->postulaciones()->pluck('ofertas_id')
+                : collect();
+
+            return view('ofertas.feed', compact('ofertas', 'postuladas'));
         }
 
         if ($usuario->esEmpresa() && ! $usuario->empresa) {

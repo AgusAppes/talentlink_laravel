@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OfertaController;
+use App\Http\Controllers\PostulacionController;
 use App\Http\Controllers\SolicitudController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,13 +37,9 @@ Route::middleware('auth')->group(function () {
 
     Route::view('/candidatos', 'placeholder', ['titulo' => 'Candidatos'])->name('candidatos.index');
     Route::view('/mi-perfil', 'placeholder', ['titulo' => 'Mi perfil'])->name('candidatos.perfil');
-    Route::get('/postulaciones', function () {
-        if (auth()->user()->esEmpresa()) {
-            abort(403);
-        }
-
-        return view('placeholder', ['titulo' => 'Postulaciones']);
-    })->name('postulaciones.index');
+    Route::get('/postulaciones', [PostulacionController::class, 'index'])->name('postulaciones.index');
+    Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])->name('postulaciones.store');
+    Route::patch('/postulaciones/{postulacion}/etapa', [PostulacionController::class, 'cambiarEtapa'])->name('postulaciones.etapa');
     Route::view('/mi-empresa', 'placeholder', ['titulo' => 'Mi empresa'])->name('empresas.perfil');
     Route::view('/usuarios', 'placeholder', ['titulo' => 'Usuarios'])->name('usuarios.index');
 });
