@@ -2,25 +2,20 @@
 
 @section('title', 'Ofertas laborales')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
-@endpush
-
 @section('content')
-    <div class="sol-toolbar">
-        <span class="sol-count">{{ $ofertas->total() }} {{ $ofertas->total() === 1 ? 'oferta' : 'ofertas' }}</span>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-secondary small">{{ $ofertas->total() }} {{ $ofertas->total() === 1 ? 'oferta' : 'ofertas' }}</span>
         @if (auth()->user()->esAdmin())
-            <a class="sol-btn" href="{{ route('ofertas.create') }}">Publicar oferta</a>
+            <a class="btn btn-primary" href="{{ route('ofertas.create') }}">Publicar oferta</a>
         @endif
     </div>
 
-    <section class="tl-card">
+    <section class="card shadow-sm border-0">
         @if ($ofertas->isEmpty())
-            <p class="sol-vacio">Todavía no hay ofertas publicadas.</p>
+            <p class="text-center text-secondary py-4 mb-0">Todavía no hay ofertas publicadas.</p>
         @else
-            <div class="sol-tabla-wrap">
-                <table class="sol-tabla">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Puesto</th>
@@ -45,7 +40,7 @@
                                 <td>
                                     {{ $oferta->busqueda->nombre_puesto }}
                                     @if (auth()->user()->esAdmin() && $oferta->requiere_cv)
-                                        <span class="ofe-badge ofe-cv">Requiere CV</span>
+                                        <span class="badge rounded-pill text-bg-primary ms-1">Requiere CV</span>
                                     @endif
                                 </td>
                                 @if (auth()->user()->esAdmin())
@@ -64,11 +59,11 @@
                                     <td>{{ $oferta->personalRrhh->nombre }} {{ $oferta->personalRrhh->apellido }}</td>
                                 @endif
                                 <td>
-                                    <span class="ofe-badge ofe-badge-{{ $oferta->estado_ofertas_id }}">{{ $oferta->estado->nombre }}</span>
+                                    <span class="badge rounded-pill {{ match ((int) $oferta->estado_ofertas_id) { 1 => 'text-bg-success', 2, 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $oferta->estado->nombre }}</span>
                                 </td>
                                 @if (auth()->user()->esAdmin())
                                     <td>
-                                        <a href="{{ route('ofertas.edit', $oferta) }}">Editar</a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('ofertas.edit', $oferta) }}">Editar</a>
                                     </td>
                                 @endif
                             </tr>
@@ -76,7 +71,9 @@
                     </tbody>
                 </table>
             </div>
-            {{ $ofertas->links('partials.paginacion') }}
+            <div class="card-body py-3">
+                {{ $ofertas->links() }}
+            </div>
         @endif
     </section>
 @endsection

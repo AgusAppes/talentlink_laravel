@@ -2,32 +2,29 @@
 
 @section('title', auth()->user()->esAdmin() ? 'Solicitudes de personal' : 'Mis solicitudes')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
-@endpush
-
 @section('content')
-    <div class="sol-toolbar">
-        <span class="sol-count">{{ $busquedas->total() }} {{ $busquedas->total() === 1 ? 'solicitud' : 'solicitudes' }}</span>
+    <div class="d-flex justify-content-end align-items-center gap-3 mb-3">
+        <span class="text-secondary small">{{ $busquedas->total() }} {{ $busquedas->total() === 1 ? 'solicitud' : 'solicitudes' }}</span>
         @if (auth()->user()->esEmpresa())
-            <a class="sol-btn" href="{{ route('solicitudes.create') }}">Nueva solicitud</a>
+            <a class="btn btn-primary" href="{{ route('solicitudes.create') }}">Nueva solicitud</a>
         @endif
     </div>
 
-    <section class="tl-card">
+    <section class="card shadow-sm border-0">
         @if ($busquedas->isEmpty())
-            <p class="sol-vacio">Todavía no hay solicitudes.</p>
-            @if (auth()->user()->esEmpresa())
-                <a href="{{ route('solicitudes.create') }}">Crear la primera</a>
-            @endif
+            <div class="card-body text-center text-secondary py-4">
+                <p class="mb-2">Todavía no hay solicitudes.</p>
+                @if (auth()->user()->esEmpresa())
+                    <a href="{{ route('solicitudes.create') }}">Crear la primera</a>
+                @endif
+            </div>
         @else
             @error('estado_busqueda_id')
-                <p class="sol-error">{{ $message }}</p>
+                <div class="invalid-feedback d-block px-3 pt-3">{{ $message }}</div>
             @enderror
 
-            <div class="sol-tabla-wrap">
-                <table class="sol-tabla">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Puesto</th>
@@ -70,29 +67,29 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="sol-badge sol-badge-{{ $busqueda->estado_busqueda_id }}">{{ $busqueda->estado->nombre }}</span>
+                                    <span class="badge rounded-pill {{ match ((int) $busqueda->estado_busqueda_id) { 1 => 'text-bg-warning', 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $busqueda->estado->nombre }}</span>
                                     @if (auth()->user()->esAdmin())
-                                        <form class="sol-estado" method="POST" action="{{ route('solicitudes.estado', $busqueda) }}">
+                                        <form class="d-flex gap-2 align-items-center mt-2" method="POST" action="{{ route('solicitudes.estado', $busqueda) }}">
                                             @csrf
                                             @method('PATCH')
-                                            <select name="estado_busqueda_id">
+                                            <select class="form-select form-select-sm w-auto" name="estado_busqueda_id">
                                                 @foreach ($estados as $estado)
                                                     <option value="{{ $estado->id }}" @selected((int) $estado->id === (int) $busqueda->estado_busqueda_id)>
                                                         {{ $estado->nombre }}
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <button type="submit">Guardar</button>
+                                            <button class="btn btn-sm btn-outline-secondary flex-shrink-0" type="submit">Guardar</button>
                                         </form>
                                     @endif
                                 </td>
                                 @if (auth()->user()->esAdmin())
                                     <td>
                                         @if ($busqueda->oferta)
-                                            <span class="ofe-badge ofe-badge-{{ $busqueda->oferta->estado_ofertas_id }}">{{ $busqueda->oferta->estado->nombre }}</span>
-                                            <a href="{{ route('ofertas.edit', $busqueda->oferta) }}">Editar oferta</a>
+                                            <span class="badge rounded-pill {{ match ((int) $busqueda->oferta->estado_ofertas_id) { 1 => 'text-bg-success', 2 => 'text-bg-warning', 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $busqueda->oferta->estado->nombre }}</span>
+                                            <a class="d-block small mt-1" href="{{ route('ofertas.edit', $busqueda->oferta) }}">Editar oferta</a>
                                         @elseif ((int) $busqueda->estado_busqueda_id !== 3)
-                                            <a class="sol-btn" href="{{ route('ofertas.create', ['busquedas_id' => $busqueda->id]) }}">Publicar oferta</a>
+                                            <a class="btn btn-sm btn-primary" href="{{ route('ofertas.create', ['busquedas_id' => $busqueda->id]) }}">Publicar oferta</a>
                                         @else
                                             —
                                         @endif
@@ -103,7 +100,9 @@
                     </tbody>
                 </table>
             </div>
-            {{ $busquedas->links('partials.paginacion') }}
+            <div class="card-body py-3">
+                {{ $busquedas->links() }}
+            </div>
         @endif
     </section>
 @endsection

@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permiso' => \App\Http\Middleware\VerificarPermiso::class,
         ]);
+
+        $middleware->redirectUsersTo(fn () => route(auth()->user()->rutaInicio()));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

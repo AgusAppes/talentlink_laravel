@@ -1,0 +1,96 @@
+:root {
+    --bs-primary: #1f3c88;
+    --bs-primary-rgb: 31, 60, 136;
+    --bs-link-color: #1f3c88;
+    --bs-link-hover-color: #122452;
+    --bs-body-bg: #f4f6fb;
+    --bs-body-color: #0f172a;
+    --bs-secondary-color: #64748b;
+    --bs-border-color: #e5e7eb;
+    --bs-body-font-family: "Segoe UI", system-ui, sans-serif;
+    --tl-brand-900: #0b1b3a;
+    --tl-brand-800: #122452;
+    --tl-accent: #3b82f6;
+}
+
+.btn-primary {
+    --bs-btn-bg: #1f3c88;
+    --bs-btn-border-color: #1f3c88;
+    --bs-btn-hover-bg: #122452;
+    --bs-btn-hover-border-color: #122452;
+    --bs-btn-active-bg: #0b1b3a;
+    --bs-btn-active-border-color: #0b1b3a;
+}
+
+.tl-sidebar {
+    --bs-offcanvas-bg: var(--tl-brand-900);
+    --bs-offcanvas-color: rgba(255, 255, 255, 0.92);
+    --bs-offcanvas-width: 260px;
+    width: 260px;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: var(--tl-brand-900) !important;
+}
+
+@media (min-width: 992px) {
+    .tl-sidebar {
+        position: sticky;
+        top: 0;
+        flex: 0 0 260px;
+        height: 100vh;
+        overflow: auto;
+    }
+}
+
+.tl-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.78);
+    border-radius: 0.5rem;
+}
+
+.tl-sidebar .nav-link:hover,
+.tl-sidebar .nav-link:focus {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.tl-sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(59, 130, 246, 0.18);
+    box-shadow: inset 2px 0 0 var(--tl-accent);
+}
+
+.tl-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--bs-primary);
+    font-size: 0.8125rem;
+}
+
+.tag-quitar {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+}

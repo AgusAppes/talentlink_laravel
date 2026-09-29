@@ -1,8 +1,3 @@
-.per-bloque {
-    margin-top: 16px;
-}
-
-.per-bloque h2,
 .can-bloque h2 {
     margin: 0 0 14px;
     color: var(--tl-ink-900);
@@ -32,30 +27,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--tl-brand-700);
+    background: var(--bs-primary);
     color: #fff;
     font-size: 1.6rem;
     font-weight: 700;
-}
-
-.per-quitar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    color: var(--tl-ink-700);
-    font-size: 14px;
-}
-
-.tag-campo {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 10px;
-    background: var(--tl-surface-1);
-    border: 1px solid var(--tl-border-200);
-    border-radius: 8px;
 }
 
 #tags {
@@ -65,12 +40,23 @@
 .tag-campo input {
     flex: 1;
     min-width: 180px;
-    padding: 4px;
+    padding: 0.15rem 0.25rem;
     border: 0;
     outline: none;
     font: inherit;
-    color: var(--tl-ink-900);
+    color: inherit;
     background: transparent;
+}
+
+.tag-campo:focus-within {
+    border-color: rgba(var(--bs-primary-rgb), 0.5);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.tag-campo.is-invalid:focus-within {
+    border-color: var(--bs-form-invalid-border-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
 }
 
 .tag-lista {
@@ -79,32 +65,11 @@
     gap: 6px;
 }
 
-.tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--tl-brand-700);
-    font-size: 13px;
-}
-
-.tag-quitar {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--tl-brand-700);
-    font: inherit;
-    line-height: 1;
-    cursor: pointer;
-}
-
 .exp-lista {
     margin: 0;
     padding: 0 0 0 16px;
     list-style: none;
-    border-left: 2px solid var(--tl-border-200);
+    border-left: 2px solid var(--bs-border-color);
 }
 
 .exp-item {
@@ -115,34 +80,7 @@
     padding-bottom: 0;
 }
 
-.exp-puesto {
-    margin: 0;
-    color: var(--tl-ink-900);
-    font-weight: 700;
-}
-
-.exp-empresa,
-.exp-periodo,
 .exp-texto {
     margin: 4px 0 0;
-    color: var(--tl-muted-600);
-}
-
-.exp-texto {
     color: var(--tl-ink-700);
-}
-
-.exp-eliminar {
-    margin-top: 8px;
-    padding: 6px 10px;
-    font: inherit;
-    color: var(--tl-ink-700);
-    background: var(--tl-surface-1);
-    border: 1px solid var(--tl-border-200);
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.exp-eliminar:hover {
-    background: var(--tl-surface-0);
 }

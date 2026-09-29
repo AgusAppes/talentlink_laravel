@@ -2,45 +2,61 @@
 
 @section('title', 'Dashboard')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-@endpush
-
 @section('content')
-    <p class="dash-saludo">Hola, {{ auth()->user()->nombreVisible() }}</p>
+    <p class="fs-5 mb-3">Hola, {{ auth()->user()->nombreVisible() }}</p>
 
-    <div class="dash-grilla">
-        <article class="dash-tarjeta">
-            <p class="dash-etiqueta">Solicitudes pendientes</p>
-            <span class="dash-numero" data-metrica="solicitudes_pendientes">{{ $metricas['solicitudes_pendientes'] }}</span>
-            <a class="dash-ver" href="{{ route('solicitudes.index') }}">Ver</a>
-        </article>
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary small mb-2">Solicitudes pendientes</p>
+                    <span class="d-block fs-2 fw-bold text-primary lh-1 mb-3" data-metrica="solicitudes_pendientes">{{ $metricas['solicitudes_pendientes'] }}</span>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('solicitudes.index') }}">Ver</a>
+                </div>
+            </article>
+        </div>
 
-        <article class="dash-tarjeta">
-            <p class="dash-etiqueta">Ofertas publicadas</p>
-            <span class="dash-numero" data-metrica="ofertas_publicadas">{{ $metricas['ofertas_publicadas'] }}</span>
-            <a class="dash-ver" href="{{ route('ofertas.index') }}">Ver</a>
-        </article>
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary small mb-2">Ofertas publicadas</p>
+                    <span class="d-block fs-2 fw-bold text-primary lh-1 mb-3" data-metrica="ofertas_publicadas">{{ $metricas['ofertas_publicadas'] }}</span>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('ofertas.index') }}">Ver</a>
+                </div>
+            </article>
+        </div>
 
-        <article class="dash-tarjeta">
-            <p class="dash-etiqueta">Postulaciones por revisar</p>
-            <span class="dash-numero" data-metrica="postulaciones_pendientes">{{ $metricas['postulaciones_pendientes'] }}</span>
-            <a class="dash-ver" href="{{ route('postulaciones.index') }}">Ver</a>
-        </article>
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary small mb-2">Postulaciones por revisar</p>
+                    <span class="d-block fs-2 fw-bold text-primary lh-1 mb-3" data-metrica="postulaciones_pendientes">{{ $metricas['postulaciones_pendientes'] }}</span>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('postulaciones.index') }}">Ver</a>
+                </div>
+            </article>
+        </div>
 
-        <article class="dash-tarjeta">
-            <p class="dash-etiqueta">Candidatos</p>
-            <span class="dash-numero" data-metrica="candidatos">{{ $metricas['candidatos'] }}</span>
-            <a class="dash-ver" href="{{ route('candidatos.index') }}">Ver</a>
-        </article>
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary small mb-2">Candidatos</p>
+                    <span class="d-block fs-2 fw-bold text-primary lh-1 mb-3" data-metrica="candidatos">{{ $metricas['candidatos'] }}</span>
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('candidatos.index') }}">Ver</a>
+                </div>
+            </article>
+        </div>
 
-        <article class="dash-tarjeta">
-            <p class="dash-etiqueta">Empresas</p>
-            <span class="dash-numero" data-metrica="empresas">{{ $metricas['empresas'] }}</span>
-        </article>
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary small mb-2">Empresas</p>
+                    <span class="d-block fs-2 fw-bold text-primary lh-1 mb-0" data-metrica="empresas">{{ $metricas['empresas'] }}</span>
+                </div>
+            </article>
+        </div>
     </div>
 
-    <p class="dash-hora">Actualizado: <span id="dash-hora">{{ now()->format('H:i:s') }}</span></p>
+    <p class="small text-secondary mt-3 mb-0">Actualizado: <span id="dash-hora">{{ now()->format('H:i:s') }}</span></p>
 @endsection
 
 @push('scripts')

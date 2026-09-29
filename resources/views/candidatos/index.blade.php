@@ -2,22 +2,17 @@
 
 @section('title', 'Candidatos')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-@endpush
-
 @section('content')
-    <div class="sol-toolbar">
-        // Muestra el total de candidatos con la palabra correcta (candidato o candidatos) dependiendo de la cantidad
-        <span class="sol-count">{{ $candidatos->total() }} {{ $candidatos->total() === 1 ? 'candidato' : 'candidatos' }}</span>
+    <div class="d-flex justify-content-end align-items-center mb-3">
+        <span class="text-secondary small">{{ $candidatos->total() }} {{ $candidatos->total() === 1 ? 'candidato' : 'candidatos' }}</span>
     </div>
 
-    <section class="tl-card">
+    <section class="card shadow-sm border-0">
         @if ($candidatos->isEmpty())
-            <p class="sol-vacio">Todavía no hay candidatos registrados.</p>
+            <p class="text-center text-secondary py-4 mb-0">Todavía no hay candidatos registrados.</p>
         @else
-            <div class="sol-tabla-wrap">
-                <table class="sol-tabla">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -39,14 +34,16 @@
                                 <td>{{ $candidato->fecha_nac?->format('d/m/Y') ?? '—' }}</td>
                                 <td>{{ $candidato->postulaciones_count }}</td>
                                 <td>
-                                    <a href="{{ route('candidatos.show', $candidato) }}">Ver detalle</a>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('candidatos.show', $candidato) }}">Ver detalle</a>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-            {{ $candidatos->links('partials.paginacion') }}
+            <div class="card-body py-3">
+                {{ $candidatos->links() }}
+            </div>
         @endif
     </section>
 @endsection

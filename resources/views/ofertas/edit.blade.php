@@ -2,49 +2,46 @@
 
 @section('title', 'Editar oferta')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
-@endpush
-
 @section('content')
-    <section class="tl-card">
-        <p class="ofe-fijo"><span>Puesto</span> {{ $oferta->busqueda->nombre_puesto }}</p>
-        <p class="ofe-fijo"><span>Empresa</span> {{ $oferta->busqueda->empresa->nombre }}</p>
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <p class="mb-2"><span class="d-block text-secondary small">Puesto</span><span class="fw-semibold">{{ $oferta->busqueda->nombre_puesto }}</span></p>
+            <p class="mb-3"><span class="d-block text-secondary small">Empresa</span><span class="fw-semibold">{{ $oferta->busqueda->empresa->nombre }}</span></p>
 
-        <form method="POST" action="{{ route('ofertas.update', $oferta) }}">
-            @csrf
-            @method('PUT')
+            <form method="POST" action="{{ route('ofertas.update', $oferta) }}">
+                @csrf
+                @method('PUT')
 
-            <div class="sol-campo">
-                <label for="estado_ofertas_id">Estado</label>
-                <select id="estado_ofertas_id" name="estado_ofertas_id" required>
-                    @foreach ($estados as $estado)
-                        <option value="{{ $estado->id }}" @selected((string) old('estado_ofertas_id', $oferta->estado_ofertas_id) === (string) $estado->id)>
-                            {{ $estado->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('estado_ofertas_id')
-                    <p class="sol-error">{{ $message }}</p>
-                @enderror
-            </div>
+                <div class="mb-3">
+                    <label class="form-label" for="estado_ofertas_id">Estado</label>
+                    <select class="form-select @error('estado_ofertas_id') is-invalid @enderror" id="estado_ofertas_id" name="estado_ofertas_id" required>
+                        @foreach ($estados as $estado)
+                            <option value="{{ $estado->id }}" @selected((string) old('estado_ofertas_id', $oferta->estado_ofertas_id) === (string) $estado->id)>
+                                {{ $estado->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('estado_ofertas_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-            <div class="sol-campo">
-                <label>
-                    <input type="checkbox" name="requiere_cv" value="1" @checked(old('requiere_cv', $oferta->requiere_cv))>
-                    Requerir CV
-                </label>
-                <p class="sol-ayuda">Si lo marcás, el candidato deberá adjuntar su CV en PDF para postularse.</p>
-                @error('requiere_cv')
-                    <p class="sol-error">{{ $message }}</p>
-                @enderror
-            </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input @error('requiere_cv') is-invalid @enderror" type="checkbox" id="requiere_cv" name="requiere_cv" value="1" @checked(old('requiere_cv', $oferta->requiere_cv))>
+                        <label class="form-check-label" for="requiere_cv">Requerir CV</label>
+                        @error('requiere_cv')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <p class="form-text">Si lo marcás, el candidato deberá adjuntar su CV en PDF para postularse.</p>
+                </div>
 
-            <div class="sol-acciones">
-                <button class="sol-btn" type="submit">Guardar</button>
-                <a class="sol-btn-sec" href="{{ route('ofertas.index') }}">Cancelar</a>
-            </div>
-        </form>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Guardar</button>
+                    <a class="btn btn-outline-secondary" href="{{ route('ofertas.index') }}">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </section>
 @endsection

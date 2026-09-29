@@ -2,20 +2,16 @@
 
 @section('title', 'Mis postulaciones')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/ofertas.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/postulaciones.css') }}">
-@endpush
-
 @section('content')
-    <section class="tl-card">
+    <section class="card shadow-sm border-0">
         @if ($postulaciones->isEmpty())
-            <p class="sol-vacio">Todavía no te postulaste a ninguna oferta.</p>
-            <a href="{{ route('ofertas.index') }}">Ofertas disponibles</a>
+            <div class="card-body text-center text-secondary py-4">
+                <p class="mb-2">Todavía no te postulaste a ninguna oferta.</p>
+                <a href="{{ route('ofertas.index') }}">Ofertas disponibles</a>
+            </div>
         @else
-            <div class="sol-tabla-wrap">
-                <table class="sol-tabla">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Puesto</th>
@@ -32,10 +28,10 @@
                                 <td>{{ $postulacion->oferta->busqueda->empresa->nombre }}</td>
                                 <td>{{ $postulacion->oferta->busqueda->detalle?->modalidad?->nombre ?? '—' }}</td>
                                 <td>
-                                    <span class="ofe-badge ofe-badge-{{ $postulacion->oferta->estado_ofertas_id }}">{{ $postulacion->oferta->estado->nombre }}</span>
+                                    <span class="badge rounded-pill {{ match ((int) $postulacion->oferta->estado_ofertas_id) { 1 => 'text-bg-success', 2, 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $postulacion->oferta->estado->nombre }}</span>
                                 </td>
                                 <td>
-                                    <span class="pos-badge pos-badge-{{ $postulacion->etapas_id }}">{{ $postulacion->etapa->nombre }}</span>
+                                    <span class="badge rounded-pill {{ match ((int) $postulacion->etapas_id) { 1, 2 => 'text-bg-warning', 3 => 'text-bg-danger', 4 => 'text-bg-success', default => 'text-bg-primary' } }}">{{ $postulacion->etapa->nombre }}</span>
                                 </td>
                             </tr>
                         @endforeach

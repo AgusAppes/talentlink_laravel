@@ -7,44 +7,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{-- Título de la pestaña. Cada vista define la sección "title". --}}
     <title>@yield('title') — TalentLink</title>
-    {{-- Estilos comunes del panel. --}}
+    @vite(['resources/css/bootstrap.css'])
+    <link rel="stylesheet" href="{{ asset('css/tema.css') }}">
+    {{-- Tokens y tarjetas que todavía usan las pantallas. --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     {{-- Hueco para CSS extra de una pantalla puntual. --}}
     @stack('styles')
 </head>
 <body>
-    <div class="app">
+    <div class="d-flex">
         {{-- Menú lateral con los accesos según el rol. --}}
         @include('partials.sidebar')
-        <div class="tl-main">
+        <div class="tl-main d-flex flex-column flex-grow-1">
             {{-- Barra superior: título de la página y menú del avatar. --}}
             @include('partials.navbar')
-            <div class="tl-content">
+            <div class="container-fluid p-4">
                 {{-- Aviso verde cuando un controlador guardó el mensaje en session('ok'). --}}
                 @if (session('ok'))
-                    <p class="tl-alert-ok">{{ session('ok') }}</p>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('ok') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
                 @endif
                 {{-- Aviso rojo cuando un controlador guardó el mensaje en session('error'). --}}
                 @if (session('error'))
-                    <p class="tl-alert-error">{{ session('error') }}</p>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
                 @endif
                 {{-- Contenido propio de cada pantalla. Cada vista lo define en la sección "content". --}}
-                {{-- yield es un método que permite insertar el contenido de otra vista en la vista actual --}}
-                {{-- Es decir, en esta sección se renderiza el contenido de la vista que extiende/incluye este archivo --}}	
                 @yield('content')
             </div>
         </div>
     </div>
+    @vite(['resources/js/app.js'])
     {{-- Espacio para JavaScript de una pantalla puntual. --}}
     @stack('scripts')
-    <script>
-        document.addEventListener('click', function (evento) {
-            var menu = document.querySelector('.tl-menu[open]');
-
-            if (menu && ! menu.contains(evento.target)) {
-                menu.removeAttribute('open');
-            }
-        });
-    </script>
 </body>
 </html>

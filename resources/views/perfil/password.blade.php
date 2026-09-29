@@ -2,46 +2,47 @@
 
 @section('title', 'Cambiar contraseña')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/solicitudes.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/perfiles.css') }}">
-@endpush
-
 @section('content')
-    <section class="tl-card pass-caja">
-        <form method="POST" action="{{ route('password.update') }}">
-            @csrf
-            @method('PUT')
+    <div class="row">
+        <div class="col-12 col-md-8 col-lg-6">
+            <section class="card shadow-sm border-0">
+                <div class="card-body">
+                    <form method="POST" action="{{ route('password.update') }}">
+                        @csrf
+                        @method('PUT')
 
-            <div class="sol-campo">
-                <label for="password_actual">Contraseña actual</label>
-                <input id="password_actual" name="password_actual" type="password" required>
-                @error('password_actual')
-                    <p class="sol-error">{{ $message }}</p>
-                @enderror
-            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password_actual">Contraseña actual</label>
+                            <input id="password_actual" name="password_actual" type="password" class="form-control @error('password_actual') is-invalid @enderror" required>
+                            @error('password_actual')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-            <div class="sol-campo">
-                <label for="password">Nueva contraseña</label>
-                <input id="password" name="password" type="password" required>
-                <p class="sol-ayuda">Mínimo 8 caracteres.</p>
-                @error('password')
-                    <p class="sol-error">{{ $message }}</p>
-                @enderror
-            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password">Nueva contraseña</label>
+                            <input id="password" name="password" type="password" class="form-control @error('password') is-invalid @enderror" required>
+                            <p class="form-text">Mínimo 8 caracteres.</p>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-            <div class="sol-campo">
-                <label for="password_confirmation">Repetir nueva contraseña</label>
-                <input id="password_confirmation" name="password_confirmation" type="password" required>
-                @error('password_confirmation')
-                    <p class="sol-error">{{ $message }}</p>
-                @enderror
-            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password_confirmation">Repetir nueva contraseña</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" class="form-control @error('password_confirmation') is-invalid @enderror" required>
+                            @error('password_confirmation')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-            <div class="sol-acciones">
-                <button class="sol-btn" type="submit">Guardar contraseña</button>
-                <a class="sol-btn-sec" href="{{ route(auth()->user()->rutaInicio()) }}">Volver</a>
-            </div>
-        </form>
-    </section>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Guardar contraseña</button>
+                            <a class="btn btn-outline-secondary" href="{{ route(auth()->user()->rutaInicio()) }}">Volver</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
 @endsection
