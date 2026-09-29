@@ -22,13 +22,12 @@ class OfertaController extends Controller
                 ->where('estado_ofertas_id', 1)
                 ->with([
                     'busqueda.empresa',
-                    'busqueda.detalle.modalidad',
-                    'busqueda.detalle.ciudad.provincia',
-                    'busqueda.habilidades',
                 ])
                 ->orderByDesc('id')
                 ->paginate(10)
                 ->withQueryString();
+
+            Busqueda::hidratarFichas($ofertas->pluck('busqueda'));
 
             // Se obtienen las ofertas a las que el candidato ha postulado
             $postuladas = $usuario->candidato
@@ -45,8 +44,6 @@ class OfertaController extends Controller
         $consulta = Oferta::query()
             ->with([
                 'busqueda.empresa',
-                'busqueda.detalle.modalidad',
-                'busqueda.detalle.ciudad.provincia',
                 'personalRrhh',
                 'estado',
             ])
@@ -58,10 +55,11 @@ class OfertaController extends Controller
             });
         }
 
+        $ofertas = $consulta->paginate(10)->withQueryString();
+        Busqueda::hidratarFichas($ofertas->pluck('busqueda'));
+
         return view('ofertas.index', [
-            'ofertas' => $consulta
-            ->paginate(10)
-            ->withQueryString(),
+            'ofertas' => $ofertas,
         ]);
     }
 

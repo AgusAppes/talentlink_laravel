@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Busqueda;
 use App\Models\Ciudad;
 use App\Models\EstadoBusqueda;
-use App\Models\Habilidad;
 use App\Models\Modalidad;
 use App\Models\Provincia;
+use App\Models\SolicitudDocumento;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SolicitudController extends Controller
 {
@@ -21,17 +20,18 @@ class SolicitudController extends Controller
         $usuario = auth()->user();
 
         $consulta = Busqueda::query()
-            ->with(['empresa', 'estado', 'detalle.modalidad', 'detalle.ciudad.provincia', 'oferta.estado'])
+            ->with(['empresa', 'estado', 'oferta.estado'])
             ->orderByDesc('id');
 
         if ($usuario->esEmpresa()) {
             $consulta->where('empresas_id', $usuario->empresa?->id);
         }
 
+        $busquedas = $consulta->paginate(10)->withQueryString();
+        Busqueda::hidratarFichas($busquedas);
+
         return view('solicitudes.index', [
-            'busquedas' => $consulta
-            ->paginate(10)
-            ->withQueryString(),
+            'busquedas' => $busquedas,
             'estados' => $usuario->esAdmin()
                 ? EstadoBusqueda::query()->orderBy('id')->get()
                 : collect(),
@@ -40,7 +40,7 @@ class SolicitudController extends Controller
 
     // Esta función muestra el formulario de alta
     // En terminos tecnicos, cuando la empresa visita /solicitudes/nueva, se ejecuta esta función
-    // y sirve solicitudes/create.blade.php con modalidades, habilidades, provincias y ciudades
+    // y sirve solicitudes/create.blade.php con modalidades, provincias y ciudades
     public function create()
     {
         if (! auth()->user()->empresa) {
@@ -55,7 +55,6 @@ class SolicitudController extends Controller
 
         return view('solicitudes.create', [
             'modalidades' => Modalidad::query()->orderBy('nombre')->get(),
-            'habilidades' => Habilidad::query()->orderBy('nombre')->get(),
             'provincias' => Provincia::query()->orderBy('nombre')->get(),
             'ciudades' => Ciudad::query()->orderBy('nombre')->get(['id', 'nombre', 'provincias_id']),
             'provinciaElegida' => $provinciaElegida,
@@ -64,7 +63,7 @@ class SolicitudController extends Controller
 
     // Esta función guarda una solicitud nueva
     // En terminos tecnicos, cuando se envía el formulario de alta, se ejecuta esta función
-    // y crea la búsqueda, el detalle y las habilidades dentro de una transacción
+    // y crea la búsqueda en MySQL y la ficha con las habilidades en MongoDB
     public function store(Request $request)
     {
         $empresa = $request->user()->empresa;
@@ -80,9 +79,8 @@ class SolicitudController extends Controller
             'anios_experiencia' => ['nullable', 'integer', 'min:0'],
             'modalidades_id' => ['required', 'exists:modalidades,id'],
             'ciudades_id' => ['nullable', 'exists:ciudades,id'],
-            'habilidades_ids' => ['nullable', 'array'],
-            'habilidades_ids.*' => ['integer', 'exists:habilidades,id'],
-            'habilidades_nuevas' => ['nullable', 'string', 'max:255'],
+            'habilidades' => ['nullable', 'array', 'max:15'],
+            'habilidades.*' => ['string', 'max:50'],
         ], [
             'nombre_puesto.required' => 'El nombre del puesto es obligatorio.',
             'nombre_puesto.max' => 'El nombre del puesto no puede superar los 100 caracteres.',
@@ -95,30 +93,29 @@ class SolicitudController extends Controller
             'modalidades_id.required' => 'La modalidad es obligatoria.',
             'modalidades_id.exists' => 'La modalidad seleccionada no es válida.',
             'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
-            'habilidades_ids.array' => 'Las habilidades no son válidas.',
-            'habilidades_ids.*.integer' => 'Una habilidad seleccionada no es válida.',
-            'habilidades_ids.*.exists' => 'Una habilidad seleccionada no es válida.',
-            'habilidades_nuevas.max' => 'Las habilidades nuevas no pueden superar los 255 caracteres.',
+            'habilidades.array' => 'Las habilidades no son válidas.',
+            'habilidades.max' => 'Podés cargar hasta 15 habilidades.',
+            'habilidades.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
         ]);
 
-        DB::transaction(function () use ($datos, $empresa) {
-            $busqueda = Busqueda::create([
-                'nombre_puesto' => $datos['nombre_puesto'],
-                'empresas_id' => $empresa->id,
-                'estado_busqueda_id' => 1,
-            ]);
+        $ciudadId = $datos['ciudades_id'] ?? null;
+        $provinciaId = null;
+        $paisId = null;
 
-            $ciudadId = $datos['ciudades_id'] ?? null;
-            $provinciaId = null;
-            $paisId = null;
+        if ($ciudadId) {
+            $ciudad = Ciudad::query()->with('provincia')->findOrFail($ciudadId);
+            $provinciaId = $ciudad->provincias_id;
+            $paisId = $ciudad->provincia->paises_id;
+        }
 
-            if ($ciudadId) {
-                $ciudad = Ciudad::query()->with('provincia')->findOrFail($ciudadId);
-                $provinciaId = $ciudad->provincias_id;
-                $paisId = $ciudad->provincia->paises_id;
-            }
+        $busqueda = Busqueda::create([
+            'nombre_puesto' => $datos['nombre_puesto'],
+            'empresas_id' => $empresa->id,
+            'estado_busqueda_id' => 1,
+        ]);
 
-            $busqueda->detalle()->create([
+        try {
+            SolicitudDocumento::guardar($busqueda->id, [
                 'descripcion' => $datos['descripcion'] ?? null,
                 'cantidad_vacantes' => $datos['cantidad_vacantes'],
                 'anios_experiencia' => $datos['anios_experiencia'] ?? null,
@@ -126,32 +123,13 @@ class SolicitudController extends Controller
                 'ciudades_id' => $ciudadId,
                 'provincias_id' => $provinciaId,
                 'paises_id' => $paisId,
+                'habilidades' => $datos['habilidades'] ?? [],
             ]);
+        } catch (\Throwable $e) {
+            $busqueda->delete();
 
-            $ids = collect($datos['habilidades_ids'] ?? [])->map(fn ($id) => (int) $id);
-
-            $nombres = collect(explode(',', (string) ($datos['habilidades_nuevas'] ?? '')))
-                ->map(fn ($nombre) => trim($nombre))
-                ->filter(fn ($nombre) => $nombre !== '')
-                ->unique(fn ($nombre) => mb_strtolower($nombre));
-
-            $catalogo = Habilidad::query()->get();
-
-            foreach ($nombres as $nombre) {
-                $habilidad = $catalogo->first(function (Habilidad $item) use ($nombre) {
-                    return mb_strtolower($item->nombre) === mb_strtolower($nombre);
-                });
-
-                if (! $habilidad) {
-                    $habilidad = Habilidad::create(['nombre' => $nombre]);
-                    $catalogo->push($habilidad);
-                }
-
-                $ids->push($habilidad->id);
-            }
-
-            $busqueda->habilidades()->sync($ids->unique()->values()->all());
-        });
+            throw $e;
+        }
 
         return redirect()
             ->route('solicitudes.index')

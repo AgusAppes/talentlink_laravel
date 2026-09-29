@@ -129,31 +129,24 @@
                 </div>
 
                 <div class="mb-3">
-                    <p class="form-label">Habilidades</p>
-                    <div class="row g-2">
-                        @foreach ($habilidades as $habilidad)
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <label class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="habilidades_ids[]" value="{{ $habilidad->id }}" @checked(collect(old('habilidades_ids', []))->contains($habilidad->id))>
-                                    <span class="form-check-label">{{ $habilidad->nombre }}</span>
-                                </label>
-                            </div>
-                        @endforeach
+                    <label class="form-label" for="tag-input-solicitud">Habilidades</label>
+                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades') || $errors->has('habilidades.*')) is-invalid @endif" data-max="15" data-nombre="habilidades[]">
+                        <div class="tags">
+                            @foreach (old('habilidades', []) as $habilidad)
+                                <span class="tag">{{ $habilidad }} <button type="button" class="tag-quitar">×</button><input type="hidden" name="habilidades[]" value="{{ $habilidad }}"></span>
+                            @endforeach
+                        </div>
+                        <input type="text" id="tag-input-solicitud" placeholder="Escribí una habilidad y presioná coma o Enter">
                     </div>
-                    @error('habilidades_ids')
+                    <div class="form-text">Máximo 15 habilidades.</div>
+                    @error('habilidades')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
-                    @error('habilidades_ids.*')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="habilidades_nuevas">Agregar otras habilidades (separadas por coma)</label>
-                    <input class="form-control @error('habilidades_nuevas') is-invalid @enderror" id="habilidades_nuevas" name="habilidades_nuevas" type="text" maxlength="255" value="{{ old('habilidades_nuevas') }}">
-                    @error('habilidades_nuevas')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    @foreach ($errors->get('habilidades.*') as $mensajes)
+                        @foreach ($mensajes as $mensaje)
+                            <div class="invalid-feedback d-block">{{ $mensaje }}</div>
+                        @endforeach
+                    @endforeach
                 </div>
             </fieldset>
 
@@ -165,3 +158,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    @include('partials.tags')
+@endpush

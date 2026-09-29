@@ -15,31 +15,31 @@
                         <div class="card-body d-flex flex-column">
                             <h2 class="h5 mb-1">{{ $oferta->busqueda->nombre_puesto }}</h2>
                             <p class="fw-semibold mb-2">{{ $oferta->busqueda->empresa->nombre }}</p>
-                            <p class="text-secondary small mb-1">{{ $oferta->busqueda->detalle?->modalidad?->nombre ?? '—' }}</p>
+                            <p class="text-secondary small mb-1">{{ $oferta->busqueda->ficha?->modalidad?->nombre ?? '—' }}</p>
                             <p class="text-secondary small mb-1">
-                                @if ($oferta->busqueda->detalle?->ciudad)
-                                    {{ $oferta->busqueda->detalle->ciudad->nombre }}, {{ $oferta->busqueda->detalle->ciudad->provincia->nombre }}
+                                @if ($oferta->busqueda->ficha?->ciudad)
+                                    {{ $oferta->busqueda->ficha->ciudad->nombre }}, {{ $oferta->busqueda->ficha->ciudad->provincia->nombre }}
                                 @else
                                     —
                                 @endif
                             </p>
-                            <p class="text-secondary small mb-1">{{ $oferta->busqueda->detalle?->cantidad_vacantes ?? '—' }} vacantes</p>
+                            <p class="text-secondary small mb-1">{{ $oferta->busqueda->ficha?->cantidad_vacantes ?? '—' }} vacantes</p>
                             <p class="text-secondary small mb-2">
-                                @if ($oferta->busqueda->detalle?->anios_experiencia === null || (int) $oferta->busqueda->detalle->anios_experiencia === 0)
+                                @if ($oferta->busqueda->ficha?->anios_experiencia === null || (int) $oferta->busqueda->ficha->anios_experiencia === 0)
                                     Sin experiencia requerida
-                                @elseif ((int) $oferta->busqueda->detalle->anios_experiencia === 1)
+                                @elseif ((int) $oferta->busqueda->ficha->anios_experiencia === 1)
                                     1 año
                                 @else
-                                    {{ $oferta->busqueda->detalle->anios_experiencia }} años
+                                    {{ $oferta->busqueda->ficha->anios_experiencia }} años
                                 @endif
                             </p>
-                            @if ($oferta->busqueda->detalle?->descripcion)
-                                <p class="mb-2">{{ Str::limit($oferta->busqueda->detalle->descripcion, 180) }}</p>
+                            @if ($oferta->busqueda->ficha?->descripcion)
+                                <p class="mb-2">{{ Str::limit($oferta->busqueda->ficha->descripcion, 180) }}</p>
                             @endif
-                            @if ($oferta->busqueda->habilidades->isNotEmpty())
+                            @if (collect($oferta->busqueda->ficha?->habilidades)->isNotEmpty())
                                 <ul class="list-unstyled d-flex flex-wrap gap-1 mb-2">
-                                    @foreach ($oferta->busqueda->habilidades as $habilidad)
-                                        <li><span class="badge rounded-pill text-bg-primary">{{ $habilidad->nombre }}</span></li>
+                                    @foreach ($oferta->busqueda->ficha->habilidades as $habilidad)
+                                        <li><span class="badge rounded-pill text-bg-primary">{{ $habilidad }}</span></li>
                                     @endforeach
                                 </ul>
                             @endif

@@ -93,9 +93,9 @@
 
                 <div class="col-12">
                     <label class="form-label" for="tag-input">Habilidades principales</label>
-                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades') || $errors->has('habilidades.*')) is-invalid @endif">
-                        <div id="tags">
-                            @foreach (old('habilidades', $candidato->habilidades->pluck('nombre')->all()) as $habilidad)
+                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades') || $errors->has('habilidades.*')) is-invalid @endif" data-max="10" data-nombre="habilidades[]">
+                        <div class="tags">
+                            @foreach (old('habilidades', $candidato->habilidades->all()) as $habilidad)
                                 <span class="tag">{{ $habilidad }} <button type="button" class="tag-quitar">×</button><input type="hidden" name="habilidades[]" value="{{ $habilidad }}"></span>
                             @endforeach
                         </div>
@@ -178,6 +178,27 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="tag-input-experiencia">Habilidades de esta experiencia</label>
+                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades_experiencia') || $errors->has('habilidades_experiencia.*')) is-invalid @endif" data-max="10" data-nombre="habilidades_experiencia[]">
+                        <div class="tags">
+                            @foreach (old('habilidades_experiencia', []) as $habilidad)
+                                <span class="tag">{{ $habilidad }} <button type="button" class="tag-quitar">×</button><input type="hidden" name="habilidades_experiencia[]" value="{{ $habilidad }}"></span>
+                            @endforeach
+                        </div>
+                        <input type="text" id="tag-input-experiencia" placeholder="Escribí una habilidad y presioná coma o Enter">
+                    </div>
+                    <div class="form-text">Máximo 10 habilidades.</div>
+                    @error('habilidades_experiencia')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                    @foreach ($errors->get('habilidades_experiencia.*') as $mensajes)
+                        @foreach ($mensajes as $mensaje)
+                            <div class="invalid-feedback d-block">{{ $mensaje }}</div>
+                        @endforeach
+                    @endforeach
+                </div>
             </div>
 
             <div class="d-flex gap-2 mt-3">
@@ -189,48 +210,5 @@
 @endsection
 
 @push('scripts')
-    <script>
-        const tags = document.getElementById('tags');
-        const tagInput = document.getElementById('tag-input');
-
-        function agregarTag(texto) {
-            texto = texto.trim();
-            if (texto === '' || tags.children.length >= 10) return;
-
-            const tag = document.createElement('span');
-            tag.className = 'tag';
-            tag.textContent = texto + ' ';
-
-            const quitar = document.createElement('button');
-            quitar.type = 'button';
-            quitar.className = 'tag-quitar';
-            quitar.textContent = '×';
-
-            const oculto = document.createElement('input');
-            oculto.type = 'hidden';
-            oculto.name = 'habilidades[]';
-            oculto.value = texto;
-
-            tag.append(quitar, oculto);
-            tags.appendChild(tag);
-        }
-
-        tagInput.addEventListener('keydown', function (e) {
-            if (e.key === ',' || e.key === 'Enter') {
-                e.preventDefault();
-                agregarTag(tagInput.value);
-                tagInput.value = '';
-            }
-        });
-
-        tags.addEventListener('click', function (e) {
-            if (e.target.classList.contains('tag-quitar')) {
-                e.target.parentElement.remove();
-            }
-        });
-
-        tagInput.form.addEventListener('submit', function () {
-            agregarTag(tagInput.value);
-        });
-    </script>
+    @include('partials.tags')
 @endpush

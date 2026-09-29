@@ -14,6 +14,13 @@
                 @if ($experiencia->descripcion)
                     <p class="mb-0 mt-1">{!! nl2br(e($experiencia->descripcion)) !!}</p>
                 @endif
+                @if (collect($experiencia->habilidades)->isNotEmpty())
+                    <ul class="list-unstyled d-flex flex-wrap gap-1 mb-0 mt-2">
+                        @foreach ($experiencia->habilidades as $habilidad)
+                            <li><span class="badge rounded-pill text-bg-primary">{{ $habilidad }}</span></li>
+                        @endforeach
+                    </ul>
+                @endif
                 @if ($editable)
                     <form method="POST" action="{{ route('perfil.experiencias.destroy', $experiencia->id) }}" onsubmit="return confirm('¿Eliminar esta experiencia?')">
                         @csrf

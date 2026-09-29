@@ -26,7 +26,7 @@
                             <tr>
                                 <td>{{ $postulacion->oferta->busqueda->nombre_puesto }}</td>
                                 <td>{{ $postulacion->oferta->busqueda->empresa->nombre }}</td>
-                                <td>{{ $postulacion->oferta->busqueda->detalle?->modalidad?->nombre ?? '—' }}</td>
+                                <td>{{ $postulacion->oferta->busqueda->ficha?->modalidad?->nombre ?? '—' }}</td>
                                 <td>
                                     <span class="badge rounded-pill {{ match ((int) $postulacion->oferta->estado_ofertas_id) { 1 => 'text-bg-success', 2, 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $postulacion->oferta->estado->nombre }}</span>
                                 </td>

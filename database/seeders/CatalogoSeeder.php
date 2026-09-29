@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SolicitudDocumento;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -185,39 +186,30 @@ class CatalogoSeeder extends Seeder
 
         $busquedaIds = DB::table('busquedas')->whereIn('nombre_puesto', $puestos)->pluck('id');
         if ($busquedaIds->isNotEmpty()) {
-            DB::table('habilidades_por_busqueda')->whereIn('busquedas_id', $busquedaIds)->delete();
-            DB::table('detalle_busquedas')->whereIn('busquedas_id', $busquedaIds)->delete();
+            SolicitudDocumento::query()
+                ->whereIn('busqueda_id', $busquedaIds->map(fn ($id) => (int) $id)->all())
+                ->delete();
             DB::table('busquedas')->whereIn('id', $busquedaIds)->delete();
         }
 
-        DB::transaction(function () use ($busquedasDemo, $empresasDemo, $geo) {
-            foreach ($busquedasDemo as $demo) {
-                $busquedaId = DB::table('busquedas')->insertGetId([
-                    'nombre_puesto' => $demo['nombre_puesto'],
-                    'empresas_id' => $empresasDemo[$demo['empresa']],
-                    'estado_busqueda_id' => 1,
-                ]);
+        foreach ($busquedasDemo as $demo) {
+            $busquedaId = DB::table('busquedas')->insertGetId([
+                'nombre_puesto' => $demo['nombre_puesto'],
+                'empresas_id' => $empresasDemo[$demo['empresa']],
+                'estado_busqueda_id' => 1,
+            ]);
 
-                DB::table('detalle_busquedas')->insert([
-                    'busquedas_id' => $busquedaId,
-                    'descripcion' => $demo['descripcion'],
-                    'cantidad_vacantes' => $demo['cantidad_vacantes'],
-                    'anios_experiencia' => $demo['anios_experiencia'],
-                    'modalidades_id' => $demo['modalidades_id'],
-                    'ciudades_id' => $geo->ciudad_id,
-                    'provincias_id' => $geo->provincias_id,
-                    'paises_id' => $geo->paises_id,
-                ]);
-
-                foreach ($demo['habilidades'] as $nombreHab) {
-                    $habId = $this->obtenerOCrearHabilidad($nombreHab);
-                    DB::table('habilidades_por_busqueda')->insert([
-                        'busquedas_id' => $busquedaId,
-                        'habilidades_id' => $habId,
-                    ]);
-                }
-            }
-        });
+            SolicitudDocumento::guardar((int) $busquedaId, [
+                'descripcion' => $demo['descripcion'],
+                'cantidad_vacantes' => $demo['cantidad_vacantes'],
+                'anios_experiencia' => $demo['anios_experiencia'],
+                'modalidades_id' => $demo['modalidades_id'],
+                'ciudades_id' => $geo->ciudad_id,
+                'provincias_id' => $geo->provincias_id,
+                'paises_id' => $geo->paises_id,
+                'habilidades' => $demo['habilidades'],
+            ]);
+        }
     }
 
     private function empresaId(string $nombre): ?int
@@ -225,18 +217,5 @@ class CatalogoSeeder extends Seeder
         $id = DB::table('empresas')->where('nombre', $nombre)->value('id');
 
         return $id !== null ? (int) $id : null;
-    }
-
-    private function obtenerOCrearHabilidad(string $nombre): int
-    {
-        $existente = DB::table('habilidades')
-            ->whereRaw('LOWER(nombre) = ?', [mb_strtolower($nombre, 'UTF-8')])
-            ->value('id');
-
-        if ($existente !== null) {
-            return (int) $existente;
-        }
-
-        return (int) DB::table('habilidades')->insertGetId(['nombre' => $nombre]);
     }
 }

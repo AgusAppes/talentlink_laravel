@@ -46,11 +46,11 @@
                                 @if (auth()->user()->esAdmin())
                                     <td>{{ $oferta->busqueda->empresa->nombre }}</td>
                                 @endif
-                                <td>{{ $oferta->busqueda->detalle?->cantidad_vacantes ?? '—' }}</td>
-                                <td>{{ $oferta->busqueda->detalle?->modalidad?->nombre ?? '—' }}</td>
+                                <td>{{ $oferta->busqueda->ficha?->cantidad_vacantes ?? '—' }}</td>
+                                <td>{{ $oferta->busqueda->ficha?->modalidad?->nombre ?? '—' }}</td>
                                 <td>
-                                    @if ($oferta->busqueda->detalle?->ciudad)
-                                        {{ $oferta->busqueda->detalle->ciudad->nombre }}, {{ $oferta->busqueda->detalle->ciudad->provincia->nombre }}
+                                    @if ($oferta->busqueda->ficha?->ciudad)
+                                        {{ $oferta->busqueda->ficha->ciudad->nombre }}, {{ $oferta->busqueda->ficha->ciudad->provincia->nombre }}
                                     @else
                                         —
                                     @endif

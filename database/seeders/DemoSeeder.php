@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\PerfilDocumento;
+use App\Models\SolicitudDocumento;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -143,10 +145,18 @@ class DemoSeeder extends Seeder
                     DB::table('ofertas')->whereIn('id', $ofertaIds)->delete();
                 }
 
-                DB::table('habilidades_por_busqueda')->whereIn('busquedas_id', $busquedaIds)->delete();
-                DB::table('detalle_busquedas')->whereIn('busquedas_id', $busquedaIds)->delete();
+                SolicitudDocumento::query()
+                    ->whereIn('busqueda_id', $busquedaIds->map(fn ($id) => (int) $id)->all())
+                    ->delete();
                 DB::table('busquedas')->whereIn('id', $busquedaIds)->delete();
             }
+        }
+
+        $candidatoIds = DB::table('candidatos')->whereIn('usuarios_id', $usuarioIds)->pluck('id');
+        if ($candidatoIds->isNotEmpty()) {
+            PerfilDocumento::query()
+                ->whereIn('candidato_id', $candidatoIds->map(fn ($id) => (int) $id)->all())
+                ->delete();
         }
 
         DB::table('candidatos')->whereIn('usuarios_id', $usuarioIds)->delete();

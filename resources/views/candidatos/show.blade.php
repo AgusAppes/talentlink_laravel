@@ -65,7 +65,7 @@
             @else
                 <div class="d-flex flex-wrap gap-2">
                     @foreach ($candidato->habilidades as $habilidad)
-                        <span class="tag">{{ $habilidad->nombre }}</span>
+                        <span class="tag">{{ $habilidad }}</span>
                     @endforeach
                 </div>
             @endif

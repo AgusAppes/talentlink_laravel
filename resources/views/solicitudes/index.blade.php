@@ -48,20 +48,20 @@
                                 @if (auth()->user()->esAdmin())
                                     <td>{{ $busqueda->empresa->nombre }}</td>
                                 @endif
-                                <td>{{ $busqueda->detalle?->cantidad_vacantes ?? '—' }}</td>
+                                <td>{{ $busqueda->ficha?->cantidad_vacantes ?? '—' }}</td>
                                 <td>
-                                    @if ($busqueda->detalle?->anios_experiencia === null)
+                                    @if ($busqueda->ficha?->anios_experiencia === null)
                                         —
-                                    @elseif ((int) $busqueda->detalle->anios_experiencia === 1)
+                                    @elseif ((int) $busqueda->ficha->anios_experiencia === 1)
                                         1 año
                                     @else
-                                        {{ $busqueda->detalle->anios_experiencia }} años
+                                        {{ $busqueda->ficha->anios_experiencia }} años
                                     @endif
                                 </td>
-                                <td>{{ $busqueda->detalle?->modalidad?->nombre ?? '—' }}</td>
+                                <td>{{ $busqueda->ficha?->modalidad?->nombre ?? '—' }}</td>
                                 <td>
-                                    @if ($busqueda->detalle?->ciudad)
-                                        {{ $busqueda->detalle->ciudad->nombre }}, {{ $busqueda->detalle->ciudad->provincia->nombre }}
+                                    @if ($busqueda->ficha?->ciudad)
+                                        {{ $busqueda->ficha->ciudad->nombre }}, {{ $busqueda->ficha->ciudad->provincia->nombre }}
                                     @else
                                         —
                                     @endif

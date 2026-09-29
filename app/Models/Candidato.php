@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Candidato extends Model
 {
@@ -40,28 +40,40 @@ class Candidato extends Model
         return $this->belongsTo(Ciudad::class, 'ciudades_id');
     }
 
-    // Esta función trae las postulaciones del candidato
-    // En terminos tecnicos, cuando el listado o el feed buscan sus postulaciones, se ejecuta esta función
-    // y usa la tabla postulaciones_por_candidatos
-    // Esta función trae las habilidades del candidato
-    // En terminos tecnicos, cuando el perfil muestra los tags, se ejecuta esta función
-    // y usa la tabla habilidades_candidatos
-    public function habilidades(): BelongsToMany
+    // Esta función trae el documento de habilidades y experiencias, una sola vez por pedido
+    // En terminos tecnicos, cuando el perfil o la ficha leen habilidades o experiencias, se ejecuta esta función
+    // y busca el documento perfiles con el id de este candidato
+    public function documentoPerfil(): ?PerfilDocumento
     {
-        return $this->belongsToMany(
-            Habilidad::class,
-            'habilidades_candidatos',
-            'candidatos_id',
-            'habilidades_id'
-        );
+        if (! $this->relationLoaded('documentoPerfil')) {
+            $this->setRelation(
+                'documentoPerfil',
+                PerfilDocumento::query()->where('candidato_id', (int) $this->id)->first()
+            );
+        }
+
+        return $this->getRelation('documentoPerfil');
+    }
+
+    // Esta función trae las habilidades generales del candidato
+    // En terminos tecnicos, cuando el perfil muestra los tags, se ejecuta esta función
+    // y lee el array habilidades del documento de Mongo
+    protected function habilidades(): Attribute
+    {
+        return Attribute::get(fn () => collect($this->documentoPerfil()?->habilidades ?? []));
     }
 
     // Esta función trae las experiencias del candidato
     // En terminos tecnicos, cuando el perfil lista la experiencia laboral, se ejecuta esta función
     // y las ordena por fecha de inicio, de la más reciente a la más vieja
-    public function experiencias(): HasMany
+    protected function experiencias(): Attribute
     {
-        return $this->hasMany(Experiencia::class, 'candidatos_id')->orderByDesc('fecha_desde');
+        return Attribute::get(function () {
+            return collect($this->documentoPerfil()?->experiencias ?? [])
+                ->map(fn ($item) => ExperienciaLaboral::desde((array) $item))
+                ->sortByDesc(fn (ExperienciaLaboral $experiencia) => $experiencia->fecha_desde ?? '')
+                ->values();
+        });
     }
 
     public function postulaciones(): BelongsToMany

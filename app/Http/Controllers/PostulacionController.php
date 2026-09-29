@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Busqueda;
 use App\Models\Etapa;
 use App\Models\Oferta;
 use App\Models\Postulacion;
@@ -28,10 +29,11 @@ class PostulacionController extends Controller
                     'etapa',
                     'oferta.estado',
                     'oferta.busqueda.empresa',
-                    'oferta.busqueda.detalle.modalidad',
                 ])
                 ->orderByDesc('id')
                 ->get();
+
+            Busqueda::hidratarFichas($postulaciones->pluck('oferta.busqueda'));
 
             return view('postulaciones.mis', compact('postulaciones'));
         }

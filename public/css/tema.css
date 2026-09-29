@@ -94,3 +94,29 @@
     line-height: 1;
     cursor: pointer;
 }
+
+.tags {
+    display: contents;
+}
+
+.tag-campo input {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.15rem 0.25rem;
+    border: 0;
+    outline: none;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+}
+
+.tag-campo:focus-within {
+    border-color: rgba(var(--bs-primary-rgb), 0.5);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.tag-campo.is-invalid:focus-within {
+    border-color: var(--bs-form-invalid-border-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+}

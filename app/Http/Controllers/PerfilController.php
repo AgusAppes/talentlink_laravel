@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ciudad;
-use App\Models\Habilidad;
+use App\Models\PerfilDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +20,7 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        $candidato->load(['ciudad.provincia', 'habilidades', 'experiencias']);
+        $candidato->load(['ciudad.provincia']);
 
         $ciudades = Ciudad::query()
             ->with('provincia')
@@ -92,27 +92,8 @@ class PerfilController extends Controller
                 'foto' => $foto,
             ]);
 
-            $nombres = collect($request->input('habilidades', []))
-                ->map(fn ($habilidad) => trim($habilidad))
-                ->filter()
-                ->unique(fn ($habilidad) => mb_strtolower($habilidad));
-
-            $catalogo = Habilidad::query()->get();
-
-            $ids = $nombres->map(function ($nombre) use ($catalogo) {
-                $existente = $catalogo->first(function (Habilidad $item) use ($nombre) {
-                    return mb_strtolower($item->nombre) === mb_strtolower($nombre);
-                });
-
-                if (! $existente) {
-                    $existente = Habilidad::create(['nombre' => $nombre]);
-                    $catalogo->push($existente);
-                }
-
-                return $existente->id;
-            })->all();
-
-            $candidato->habilidades()->sync($ids);
+            PerfilDocumento::deCandidato((int) $candidato->id)
+                ->guardarHabilidades($request->input('habilidades', []));
         });
 
         return redirect()
@@ -122,7 +103,7 @@ class PerfilController extends Controller
 
     // Esta función agrega una experiencia laboral
     // En terminos tecnicos, cuando se envía el formulario de experiencia, se ejecuta esta función
-    // y crea la fila en experiencias del candidato logueado
+    // y agrega la experiencia, con sus habilidades, al documento del candidato
     public function storeExperiencia(Request $request)
     {
         $candidato = $request->user()->candidato;
@@ -137,6 +118,8 @@ class PerfilController extends Controller
             'fecha_desde' => ['nullable', 'date_format:Y-m'],
             'fecha_hasta' => ['nullable', 'date_format:Y-m', 'after_or_equal:fecha_desde'],
             'descripcion' => ['nullable', 'string', 'max:1000'],
+            'habilidades_experiencia' => ['nullable', 'array', 'max:10'],
+            'habilidades_experiencia.*' => ['string', 'max:50'],
         ], [
             'empresa.required' => 'El nombre de la empresa es obligatorio.',
             'empresa.max' => 'El nombre de la empresa no puede superar los 100 caracteres.',
@@ -145,14 +128,17 @@ class PerfilController extends Controller
             'fecha_hasta.date_format' => 'La fecha de fin no es válida.',
             'fecha_hasta.after_or_equal' => 'La fecha de fin no puede ser anterior a la de inicio.',
             'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
+            'habilidades_experiencia.max' => 'Podés cargar hasta 10 habilidades en la experiencia.',
+            'habilidades_experiencia.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
         ]);
 
-        $candidato->experiencias()->create([
+        PerfilDocumento::deCandidato((int) $candidato->id)->agregarExperiencia([
             'empresa' => $datos['empresa'],
             'puesto' => $datos['puesto'] ?? null,
             'fecha_desde' => ($datos['fecha_desde'] ?? null) ? $datos['fecha_desde'].'-01' : null,
             'fecha_hasta' => ($datos['fecha_hasta'] ?? null) ? $datos['fecha_hasta'].'-01' : null,
             'descripcion' => $datos['descripcion'] ?? null,
+            'habilidades' => $datos['habilidades_experiencia'] ?? [],
         ]);
 
         return redirect()
@@ -171,8 +157,11 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        $experiencia = $candidato->experiencias()->findOrFail($id);
-        $experiencia->delete();
+        $perfil = PerfilDocumento::deCandidato((int) $candidato->id);
+
+        if (! $perfil->quitarExperiencia((string) $id)) {
+            abort(404);
+        }
 
         return redirect()
             ->route('candidatos.perfil')
