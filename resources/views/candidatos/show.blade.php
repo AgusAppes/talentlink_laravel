@@ -13,7 +13,7 @@
         <div class="card-body">
             <div class="per-foto-fila">
                 @if ($candidato->foto)
-                    <img class="per-foto" src="{{ asset('storage/'.$candidato->foto) }}" alt="Foto de {{ $candidato->nombre }}">
+                    <img class="per-foto" src="{{ $candidato->urlFoto() }}" alt="Foto de {{ $candidato->nombre }}">
                 @else
                     <span class="per-avatar">{{ $candidato->usuario->iniciales() }}</span>
                 @endif

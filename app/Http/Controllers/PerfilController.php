@@ -70,15 +70,20 @@ class PerfilController extends Controller
         ]);
 
         $foto = $candidato->foto;
+        $discoFotos = config('filesystems.foto_disk');
 
         if ($request->hasFile('foto')) {
             if ($foto) {
-                Storage::disk('public')->delete($foto);
+                Storage::disk($discoFotos)->delete($foto);
             }
 
-            $foto = $request->file('foto')->store('fotos', 'public');
+            $foto = $request->file('foto')->store('fotos', $discoFotos);
+
+            if (! $foto) {
+                return back()->with('error', 'No se pudo guardar la foto.')->withInput();
+            }
         } elseif ($request->boolean('quitar_foto') && $foto) {
-            Storage::disk('public')->delete($foto);
+            Storage::disk($discoFotos)->delete($foto);
             $foto = null;
         }
 

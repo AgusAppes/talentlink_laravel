@@ -7,10 +7,95 @@
 @endpush
 
 @section('content')
+    @php($editando = $errors->any())
+
     <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+        <button class="btn btn-outline-secondary {{ $editando ? 'd-none' : '' }}" type="button" id="btn-editar-perfil" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Editar perfil" aria-label="Editar perfil">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+            </svg>
+        </button>
+        <button class="btn btn-outline-secondary {{ $editando ? '' : 'd-none' }}" type="button" id="btn-cancelar-edicion">Cancelar</button>
         <a class="btn btn-outline-secondary" href="{{ route('password.edit') }}">Cambiar contraseña</a>
     </div>
 
+    <div id="vista-perfil" class="{{ $editando ? 'd-none' : '' }}">
+        <section class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="per-foto-fila">
+                    @if ($candidato->foto)
+                        <img class="per-foto" src="{{ $candidato->urlFoto() }}" alt="Foto de {{ $candidato->nombre }}">
+                    @else
+                        <span class="per-avatar">{{ auth()->user()->iniciales() }}</span>
+                    @endif
+                </div>
+
+                <dl class="row g-3 mb-0">
+                    <div class="col-12 col-md-6">
+                        <dt class="text-secondary small fw-normal">Nombre y apellido</dt>
+                        <dd class="mb-0">{{ $candidato->nombre }} {{ $candidato->apellido }}</dd>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <dt class="text-secondary small fw-normal">Correo</dt>
+                        <dd class="mb-0">{{ auth()->user()->correo }}</dd>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <dt class="text-secondary small fw-normal">Fecha de nacimiento</dt>
+                        <dd class="mb-0">{{ $candidato->fecha_nac?->format('d/m/Y') ?? '—' }}</dd>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <dt class="text-secondary small fw-normal">Ubicación</dt>
+                        <dd class="mb-0">
+                            @if ($candidato->ciudad)
+                                {{ $candidato->ciudad->nombre }}, {{ $candidato->ciudad->provincia->nombre }}
+                            @else
+                                —
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mt-3">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Acerca de</h2>
+                @if ($candidato->descripcion)
+                    <p class="mb-0">{!! nl2br(e($candidato->descripcion)) !!}</p>
+                @else
+                    <p class="text-center text-secondary py-4 mb-0">Sin descripción.</p>
+                @endif
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mt-3">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Habilidades</h2>
+                @if ($candidato->habilidades->isEmpty())
+                    <p class="text-center text-secondary py-4 mb-0">Sin habilidades cargadas.</p>
+                @else
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach ($candidato->habilidades as $habilidad)
+                            <span class="tag">{{ $habilidad }}</span>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mt-3">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Experiencia laboral</h2>
+                @include('candidatos._experiencias', [
+                    'experiencias' => $candidato->experiencias,
+                    'editable' => false,
+                    'vacio' => 'Sin experiencias cargadas.',
+                ])
+            </div>
+        </section>
+    </div>
+
+    <div id="editar-perfil" class="{{ $editando ? '' : 'd-none' }}">
     <section class="card shadow-sm border-0">
         <div class="card-body">
         <div class="bg-body-secondary rounded p-3 mb-3">
@@ -22,11 +107,10 @@
             @method('PUT')
 
             <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mb-3">
-                @if ($candidato->foto)
-                    <img class="per-foto" src="{{ asset('storage/'.$candidato->foto) }}" alt="Foto de perfil">
-                @else
-                    <span class="per-avatar">{{ auth()->user()->iniciales() }}</span>
-                @endif
+                <div>
+                    <img class="per-foto {{ $candidato->foto ? '' : 'd-none' }}" id="preview-foto-img" alt="Vista previa de la foto de perfil" @if ($candidato->foto) src="{{ $candidato->urlFoto() }}" data-actual="{{ $candidato->urlFoto() }}" @endif>
+                    <span class="per-avatar {{ $candidato->foto ? 'd-none' : '' }}" id="preview-foto-iniciales">{{ auth()->user()->iniciales() }}</span>
+                </div>
 
                 <div class="flex-grow-1">
                     <label class="form-label" for="foto">Foto de perfil</label>
@@ -207,8 +291,96 @@
         </form>
         </div>
     </section>
+    </div>
 @endsection
 
 @push('scripts')
     @include('partials.tags')
+    <script>
+        const vistaPerfil = document.getElementById('vista-perfil');
+        const editarPerfil = document.getElementById('editar-perfil');
+        const botonEditar = document.getElementById('btn-editar-perfil');
+        const botonCancelar = document.getElementById('btn-cancelar-edicion');
+
+        botonEditar.addEventListener('click', function () {
+            vistaPerfil.classList.add('d-none');
+            editarPerfil.classList.remove('d-none');
+            botonEditar.classList.add('d-none');
+            botonCancelar.classList.remove('d-none');
+        });
+
+        botonCancelar.addEventListener('click', function () {
+            editarPerfil.classList.add('d-none');
+            vistaPerfil.classList.remove('d-none');
+            botonCancelar.classList.add('d-none');
+            botonEditar.classList.remove('d-none');
+        });
+
+        const inputFoto = document.getElementById('foto');
+        const imgPreview = document.getElementById('preview-foto-img');
+        const inicialesPreview = document.getElementById('preview-foto-iniciales');
+        const quitarFoto = document.querySelector('input[name="quitar_foto"]');
+        let vistaPreviaUrl = null;
+
+        function mostrarFoto(src) {
+            imgPreview.src = src;
+            imgPreview.classList.remove('d-none');
+            inicialesPreview.classList.add('d-none');
+        }
+
+        function mostrarIniciales() {
+            imgPreview.classList.add('d-none');
+            inicialesPreview.classList.remove('d-none');
+        }
+
+        function soltarVistaPrevia() {
+            if (vistaPreviaUrl) {
+                URL.revokeObjectURL(vistaPreviaUrl);
+                vistaPreviaUrl = null;
+            }
+        }
+
+        function restaurarFoto() {
+            soltarVistaPrevia();
+            if (quitarFoto && quitarFoto.checked) {
+                mostrarIniciales();
+                return;
+            }
+            if (imgPreview.dataset.actual) {
+                mostrarFoto(imgPreview.dataset.actual);
+                return;
+            }
+            mostrarIniciales();
+        }
+
+        inputFoto.addEventListener('change', function () {
+            soltarVistaPrevia();
+            const archivo = inputFoto.files && inputFoto.files[0];
+            if (!archivo || !archivo.type.startsWith('image/')) {
+                restaurarFoto();
+                return;
+            }
+            if (quitarFoto) {
+                quitarFoto.checked = false;
+            }
+            vistaPreviaUrl = URL.createObjectURL(archivo);
+            mostrarFoto(vistaPreviaUrl);
+        });
+
+        if (quitarFoto) {
+            quitarFoto.addEventListener('change', function () {
+                if (quitarFoto.checked) {
+                    inputFoto.value = '';
+                    soltarVistaPrevia();
+                    mostrarIniciales();
+                    return;
+                }
+                restaurarFoto();
+            });
+
+            if (quitarFoto.checked) {
+                mostrarIniciales();
+            }
+        }
+    </script>
 @endpush

@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'permiso' => \App\Http\Middleware\VerificarPermiso::class,
         ]);
 
+        // Render termina HTTPS en su proxy. Sin esto Laravel arma los links en http.
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectUsersTo(fn () => route(auth()->user()->rutaInicio()));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

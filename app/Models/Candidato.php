@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Candidato extends Model
 {
@@ -74,6 +75,25 @@ class Candidato extends Model
                 ->sortByDesc(fn (ExperienciaLaboral $experiencia) => $experiencia->fecha_desde ?? '')
                 ->values();
         });
+    }
+
+    // Esta función arma la dirección de la foto de perfil
+    // En terminos tecnicos, cuando una vista muestra la foto, se ejecuta esta función
+    // y devuelve la URL del disco de fotos: el disco local, o una URL temporal de R2
+    public function urlFoto(): ?string
+    {
+        if (! $this->foto) {
+            return null;
+        }
+
+        $disco = config('filesystems.foto_disk');
+        $storage = Storage::disk($disco);
+
+        if ($disco === 's3') {
+            return $storage->temporaryUrl($this->foto, now()->addHours(2));
+        }
+
+        return $storage->url($this->foto);
     }
 
     public function postulaciones(): BelongsToMany

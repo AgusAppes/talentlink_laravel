@@ -91,7 +91,11 @@ class PostulacionController extends Controller
         $rutaCv = null;
 
         if ($oferta->requiere_cv) {
-            $rutaCv = $request->file('cv')->store('cvs', 'local');
+            $rutaCv = $request->file('cv')->store('cvs', config('filesystems.cv_disk'));
+
+            if (! $rutaCv) {
+                return back()->with('error', 'No se pudo guardar el CV.')->with('cv_oferta', $oferta->id);
+            }
         }
 
         DB::transaction(function () use ($oferta, $candidato, $rutaCv) {
@@ -130,13 +134,14 @@ class PostulacionController extends Controller
 
     // Esta función muestra el CV de una postulación
     // En terminos tecnicos, cuando el admin abre /postulaciones/{id}/cv, se ejecuta esta función
-    // y devuelve el PDF guardado en storage/app/private/cvs/{id}.pdf
+    // y devuelve el PDF guardado en el disco de CV
     public function cv($id)
     {
         $postulacion = Postulacion::findOrFail($id);
+        $disco = config('filesystems.cv_disk');
 
-        abort_if(! $postulacion->cv || ! Storage::disk('local')->exists($postulacion->cv), 404);
+        abort_if(! $postulacion->cv || ! Storage::disk($disco)->exists($postulacion->cv), 404);
 
-        return Storage::disk('local')->response($postulacion->cv);
+        return Storage::disk($disco)->response($postulacion->cv);
     }
 }
