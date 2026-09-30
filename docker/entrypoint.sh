@@ -8,6 +8,14 @@ sed -i "s/<VirtualHost \*:.*>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-avail
 
 cd /var/www/html
 
+if [ -f /etc/secrets/aiven-ca.pem ]; then
+  cp /etc/secrets/aiven-ca.pem /usr/local/share/aiven-ca.pem
+  chmod 644 /usr/local/share/aiven-ca.pem
+  export MYSQL_ATTR_SSL_CA=/usr/local/share/aiven-ca.pem
+fi
+
+export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
+
 php artisan package:discover --ansi
 php artisan storage:link || true
 php artisan migrate --force
