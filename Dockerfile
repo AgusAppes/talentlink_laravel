@@ -49,6 +49,8 @@ RUN chmod +x /usr/local/bin/install-php-extensions \
     && a2enmod rewrite \
     && a2enconf laravel \
     && echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
+    && groupadd -g 1000 rendersecrets \
+    && usermod -a -G 1000 www-data \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
