@@ -27,7 +27,7 @@ RUN npm ci
 COPY --from=vendor /app /app
 RUN npm run build
 
-FROM php:8.3-apache
+FROM php:8.3-apache-bookworm
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
