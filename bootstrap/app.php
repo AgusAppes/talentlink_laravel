@@ -22,5 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn () => route(auth()->user()->rutaInicio()));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // El 419 es un formulario con la sesión vieja. Se vuelve a la pantalla con un aviso.
+        $exceptions->respond(function ($response, $exception, $request) {
+            if ($response->getStatusCode() !== 419 || $request->expectsJson()) {
+                return $response;
+            }
+
+            return back()->with('error', 'La página expiró. Volvé a intentar.');
+        });
     })->create();

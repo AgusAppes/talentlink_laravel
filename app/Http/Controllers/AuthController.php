@@ -17,7 +17,9 @@ class AuthController extends Controller
     // que sirve el archivo auth.login.blade.php
     public function showLogin()
     {
-        return view('auth.login');
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     // Esta función valida los datos del formulario de login
@@ -83,7 +85,9 @@ class AuthController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return view('auth.registro', compact('ciudades'));
+        return response()
+            ->view('auth.registro', compact('ciudades'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     public function registro(Request $request)
