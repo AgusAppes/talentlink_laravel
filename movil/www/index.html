@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TalentLink</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f6fb; color: #0f172a; }
+        main { max-width: 32rem; margin: 0 auto; padding: 1.25rem; }
+        h1 { margin: 0 0 0.25rem; font-size: 1.4rem; color: #0b1b3a; }
+        p, label { color: #64748b; }
+        label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.9rem; }
+        input { width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; }
+        button { margin-top: 0.75rem; padding: 0.55rem 0.9rem; border: 0; border-radius: 0.5rem; background: #1f3c88; color: #fff; }
+        button.secundario { background: transparent; color: #1f3c88; }
+        article { margin-top: 0.75rem; padding: 0.9rem; background: #fff; border-radius: 0.75rem; }
+        article h2 { margin: 0; font-size: 1.05rem; }
+        .aviso { color: #1f3c88; }
+        .error { color: #b91c1c; }
+        .barra { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+    </style>
+</head>
+<body>
+    <main>
+        <section id="login">
+            <h1>TalentLink</h1>
+            <p>Entrá con tu cuenta de candidato.</p>
+            <form id="form-login">
+                <label for="servidor">Dirección del servidor</label>
+                <input id="servidor" type="url" placeholder="https://tu-servidor" required>
+                <label for="correo">Correo</label>
+                <input id="correo" type="email" autocomplete="username" required>
+                <label for="password">Contraseña</label>
+                <input id="password" type="password" autocomplete="current-password" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <p id="login-aviso" class="error"></p>
+        </section>
+
+        <section id="feed" hidden>
+            <div class="barra">
+                <h1 id="saludo">Ofertas</h1>
+                <button id="salir" class="secundario" type="button">Salir</button>
+            </div>
+            <p id="feed-aviso" class="aviso"></p>
+            <div id="ofertas"></div>
+            <h2>En este teléfono</h2>
+            <div id="pendientes"></div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

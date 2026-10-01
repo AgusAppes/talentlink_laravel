@@ -18,10 +18,12 @@ class User extends Authenticatable
         'roles_id',
         'correo',
         'password',
+        'api_token',
     ];
 
     protected $hidden = [
         'password',
+        'api_token',
     ];
 
     public function rol(): BelongsTo
