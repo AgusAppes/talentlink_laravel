@@ -22,6 +22,14 @@
             {{-- Barra superior: título de la página y menú del avatar. --}}
             @include('partials.navbar')
             <div class="container-fluid p-4">
+                {{-- En Android, el candidato ve el enlace para bajar la aplicación. --}}
+                @if (auth()->user()->esCandidato() && preg_match('/Android/i', request()->userAgent() ?? ''))
+                    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                        Estás en el celular. Podés usar TalentLink desde la aplicación.
+                        <a class="alert-link" href="{{ asset('TalentLink.apk') }}">Descargar</a>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                @endif
                 {{-- Aviso verde cuando un controlador guardó el mensaje en session('ok'). --}}
                 @if (session('ok'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
