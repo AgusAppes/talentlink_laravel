@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Busqueda;
 use App\Models\Candidato;
 use App\Models\Oferta;
 use App\Models\Postulacion;
@@ -67,29 +68,30 @@ class MovilController extends Controller
 
         $ofertas = Oferta::query()
             ->where('estado_ofertas_id', 1)
-            ->with([
-                'busqueda.empresa',
-                'busqueda.detalle.modalidad',
-                'busqueda.detalle.ciudad',
-            ])
+            ->with(['busqueda.empresa'])
             ->orderByDesc('id')
-            ->get()
-            ->map(function (Oferta $oferta) use ($postuladas) {
-                $detalle = $oferta->busqueda->detalle;
+            ->get();
 
-                return [
-                    'id' => $oferta->id,
-                    'puesto' => $oferta->busqueda->nombre_puesto,
-                    'empresa' => $oferta->busqueda->empresa->nombre,
-                    'modalidad' => $detalle?->modalidad?->nombre,
-                    'ciudad' => $detalle?->ciudad?->nombre,
-                    'vacantes' => $detalle?->cantidad_vacantes,
-                    'descripcion' => $detalle?->descripcion,
-                    'requiere_cv' => (bool) $oferta->requiere_cv,
-                    'ya_postulada' => $postuladas->contains($oferta->id),
-                ];
-            })
-            ->values();
+        Busqueda::hidratarFichas($ofertas->pluck('busqueda'));
+
+        $ofertas = $ofertas->map(function (Oferta $oferta) use ($postuladas) {
+            $ficha = $oferta->busqueda?->ficha;
+            $ciudad = $ficha?->ciudad
+                ? $ficha->ciudad->nombre.($ficha->ciudad->provincia ? ', '.$ficha->ciudad->provincia->nombre : '')
+                : null;
+
+            return [
+                'id' => $oferta->id,
+                'puesto' => $oferta->busqueda?->nombre_puesto,
+                'empresa' => $oferta->busqueda?->empresa?->nombre,
+                'modalidad' => $ficha?->modalidad?->nombre,
+                'ciudad' => $ciudad,
+                'vacantes' => $ficha?->cantidad_vacantes,
+                'descripcion' => $ficha?->descripcion,
+                'requiere_cv' => (bool) $oferta->requiere_cv,
+                'ya_postulada' => $postuladas->contains($oferta->id),
+            ];
+        })->values();
 
         return response()->json([
             'ok' => true,

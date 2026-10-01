@@ -1,10 +1,5 @@
 {
     "appId": "com.talentlink.app",
     "appName": "TalentLink",
-    "webDir": "www",
-    "plugins": {
-        "CapacitorHttp": {
-            "enabled": true
-        }
-    }
+    "webDir": "www"
 }
