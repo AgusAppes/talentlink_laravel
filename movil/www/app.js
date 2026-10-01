@@ -166,25 +166,46 @@ function marcarOfertaEnviada(id) {
     }
 }
 
+function agregar(padre, etiqueta, clase, texto) {
+    const nodo = document.createElement(etiqueta);
+    if (clase) {
+        nodo.className = clase;
+    }
+    nodo.textContent = texto;
+    padre.append(nodo);
+}
+
 function dibujarOfertas(ofertas) {
     listaOfertas.innerHTML = '';
 
     if (!ofertas.length) {
-        listaOfertas.innerHTML = '<p>No hay ofertas guardadas.</p>';
+        listaOfertas.innerHTML = '<p class="vacio">No hay ofertas guardadas.</p>';
         return;
     }
 
     ofertas.forEach((oferta) => {
         const tarjeta = document.createElement('article');
-        const detalle = [oferta.empresa, oferta.modalidad, oferta.ciudad].filter(Boolean).join(' · ');
-        tarjeta.innerHTML = '<h2></h2><p></p>';
-        tarjeta.querySelector('h2').textContent = oferta.puesto;
-        tarjeta.querySelector('p').textContent = detalle;
+        agregar(tarjeta, 'p', 'empresa', oferta.empresa || 'Empresa');
+        agregar(tarjeta, 'h2', '', oferta.puesto || 'Oferta');
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        [oferta.modalidad, oferta.ciudad, oferta.vacantes ? oferta.vacantes + ' vacantes' : '']
+            .filter(Boolean)
+            .forEach((dato) => agregar(meta, 'span', '', dato));
+
+        if (meta.childElementCount) {
+            tarjeta.append(meta);
+        }
+
+        if (oferta.descripcion) {
+            agregar(tarjeta, 'p', 'descripcion', oferta.descripcion.slice(0, 180));
+        }
 
         if (oferta.ya_postulada) {
-            tarjeta.insertAdjacentHTML('beforeend', '<p>Ya te postulaste</p>');
+            agregar(tarjeta, 'p', 'estado', 'Ya te postulaste');
         } else if (oferta.requiere_cv) {
-            tarjeta.insertAdjacentHTML('beforeend', '<p>Esta oferta pide CV. Postulate desde la web.</p>');
+            agregar(tarjeta, 'p', 'nota', 'Esta oferta pide CV. Postulate desde la web.');
         } else {
             const boton = document.createElement('button');
             boton.type = 'button';
@@ -202,15 +223,14 @@ function dibujarPendientes() {
     listaPendientes.innerHTML = '';
 
     if (!pendientes.length) {
-        listaPendientes.innerHTML = '<p>Todavía no guardaste postulaciones.</p>';
+        listaPendientes.innerHTML = '<p class="vacio">Todavía no guardaste postulaciones.</p>';
         return;
     }
 
     pendientes.forEach((item) => {
         const tarjeta = document.createElement('article');
-        tarjeta.innerHTML = '<h2></h2><p></p>';
-        tarjeta.querySelector('h2').textContent = item.puesto;
-        tarjeta.querySelector('p').textContent = item.estado === 'enviado' ? 'Enviada al servidor' : 'Pendiente de envío';
+        agregar(tarjeta, 'h2', '', item.puesto || 'Postulación');
+        agregar(tarjeta, 'p', item.estado === 'enviado' ? 'estado' : 'nota', item.estado === 'enviado' ? 'Enviada al servidor' : 'Pendiente de envío');
 
         if (item.estado === 'pendiente') {
             const boton = document.createElement('button');
