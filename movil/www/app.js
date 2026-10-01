@@ -1,3 +1,5 @@
+const SERVIDOR = 'https://talentlink-laravel.onrender.com';
+
 const login = document.querySelector('#login');
 const feed = document.querySelector('#feed');
 const formLogin = document.querySelector('#form-login');
@@ -5,8 +7,6 @@ const avisoLogin = document.querySelector('#login-aviso');
 const avisoFeed = document.querySelector('#feed-aviso');
 const listaOfertas = document.querySelector('#ofertas');
 const listaPendientes = document.querySelector('#pendientes');
-
-document.querySelector('#servidor').value = localStorage.getItem('servidor') || '';
 
 if (localStorage.getItem('token')) {
     mostrarFeed();
@@ -16,7 +16,6 @@ if (localStorage.getItem('token')) {
 formLogin.addEventListener('submit', async (evento) => {
     evento.preventDefault();
     avisoLogin.textContent = '';
-    localStorage.setItem('servidor', servidor());
 
     try {
         const datos = await pedir('/api/movil/login', {
@@ -92,7 +91,7 @@ async function postular(oferta) {
 
 async function pedir(ruta, opciones = {}) {
     const token = localStorage.getItem('token');
-    const respuesta = await fetch(servidor() + ruta, {
+    const respuesta = await fetch(SERVIDOR + ruta, {
         method: opciones.method || 'GET',
         headers: {
             Accept: 'application/json',
@@ -111,11 +110,6 @@ async function pedir(ruta, opciones = {}) {
     }
 
     return datos;
-}
-
-function servidor() {
-    return document.querySelector('#servidor').value.replace(/\/$/, '')
-        || (localStorage.getItem('servidor') || '').replace(/\/$/, '');
 }
 
 function mostrarFeed() {
