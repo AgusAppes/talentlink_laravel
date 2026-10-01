@@ -1,9 +1,11 @@
 const SERVIDOR = 'https://talentlink-laravel.onrender.com';
 
 const login = document.querySelector('#login');
+const registro = document.querySelector('#registro');
 const feed = document.querySelector('#feed');
 const formLogin = document.querySelector('#form-login');
 const avisoLogin = document.querySelector('#login-aviso');
+const avisoRegistro = document.querySelector('#registro-aviso');
 const avisoFeed = document.querySelector('#feed-aviso');
 const listaOfertas = document.querySelector('#ofertas');
 const listaPendientes = document.querySelector('#pendientes');
@@ -28,21 +30,58 @@ formLogin.addEventListener('submit', async (evento) => {
                 password: document.querySelector('#password').value,
             },
         });
-        localStorage.setItem('token', datos.token);
-        localStorage.setItem('nombre', (datos.nombre + ' ' + datos.apellido).trim());
-        mostrarFeed();
-        cargarOfertas();
+        entrar(datos);
     } catch (error) {
         avisoLogin.textContent = error.message;
+    }
+});
+
+document.querySelector('#ir-registro').addEventListener('click', () => {
+    avisoLogin.textContent = '';
+    avisoRegistro.textContent = '';
+    login.hidden = true;
+    registro.hidden = false;
+});
+
+document.querySelector('#ir-login').addEventListener('click', () => {
+    avisoRegistro.textContent = '';
+    registro.hidden = true;
+    login.hidden = false;
+});
+
+document.querySelector('#form-registro').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    avisoRegistro.textContent = '';
+
+    try {
+        const datos = await pedir('/api/movil/registro', {
+            method: 'POST',
+            espera: 'Creando cuenta...',
+            body: {
+                nombre: document.querySelector('#nombre').value,
+                apellido: document.querySelector('#apellido').value,
+                correo: document.querySelector('#correo-registro').value,
+                password: document.querySelector('#password-registro').value,
+                password_confirmation: document.querySelector('#password-confirmacion').value,
+            },
+        });
+        entrar(datos);
+    } catch (error) {
+        avisoRegistro.textContent = error.message;
     }
 });
 
 document.querySelector('#salir').addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('nombre');
+    mostrarVista('ofertas');
     feed.hidden = true;
+    registro.hidden = true;
     login.hidden = false;
 });
+
+document.querySelector('#ir-ofertas').addEventListener('click', () => mostrarVista('ofertas'));
+document.querySelector('#ir-postulaciones').addEventListener('click', () => mostrarVista('postulaciones'));
 
 // Esta función pide las ofertas y las guarda en el teléfono
 // En terminos tecnicos, cuando se abre el feed, se ejecuta esta función
@@ -138,10 +177,29 @@ function ocultarCarga() {
     }
 }
 
+function entrar(datos) {
+    localStorage.setItem('token', datos.token);
+    localStorage.setItem('nombre', (datos.nombre + ' ' + datos.apellido).trim());
+    registro.hidden = true;
+    mostrarFeed();
+    cargarOfertas();
+}
+
 function mostrarFeed() {
     login.hidden = true;
     feed.hidden = false;
-    document.querySelector('#saludo').textContent = localStorage.getItem('nombre') || 'Ofertas';
+    mostrarVista('ofertas');
+}
+
+function mostrarVista(vista) {
+    const esOfertas = vista === 'ofertas';
+    document.querySelector('#vista-ofertas').hidden = !esOfertas;
+    document.querySelector('#vista-postulaciones').hidden = esOfertas;
+    document.querySelector('#ir-ofertas').classList.toggle('activo', esOfertas);
+    document.querySelector('#ir-postulaciones').classList.toggle('activo', !esOfertas);
+    document.querySelector('#saludo').textContent = esOfertas
+        ? (localStorage.getItem('nombre') || 'Ofertas')
+        : 'Postulaciones';
 }
 
 function marcarPendiente(oferta, estado) {

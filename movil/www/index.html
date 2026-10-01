@@ -8,8 +8,9 @@
         body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f6fb; color: #0f172a; }
         h1, h2, p { margin: 0; }
         button { font: inherit; cursor: pointer; }
-        #login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; box-sizing: border-box; }
-        #login[hidden] { display: none; }
+        #login, #registro { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; box-sizing: border-box; }
+        #login[hidden], #registro[hidden] { display: none; }
+        .enlace { display: block; width: 100%; margin-top: 0.35rem; padding: 0.6rem; border: 0; background: transparent; color: #1f3c88; font-weight: 600; }
         .login-caja { width: 100%; max-width: 24rem; }
         .logo { display: block; width: 8.5rem; height: auto; margin: 0 auto 1.25rem; border-radius: 0.75rem; }
         .panel { background: #fff; border-radius: 1rem; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); padding: 1.5rem; }
@@ -19,8 +20,12 @@
         input { width: 100%; box-sizing: border-box; min-height: 3rem; padding: 0.75rem 0.9rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; }
         .entrar { width: 100%; margin-top: 1.25rem; min-height: 3rem; border: 0; border-radius: 0.75rem; background: #1f3c88; color: #fff; font-weight: 600; }
         .error { min-height: 1.25rem; margin-top: 0.75rem; color: #b91c1c; }
-        #feed { padding-bottom: 2rem; }
+        #feed { padding-bottom: 5rem; }
         #feed[hidden] { display: none; }
+        .vista[hidden] { display: none; }
+        .menu { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 0.35rem; padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #e5e7eb; }
+        .menu button { flex: 1; margin: 0; min-height: 2.75rem; border: 0; border-radius: 0.75rem; background: transparent; color: #64748b; font-weight: 600; }
+        .menu button.activo { background: #eef2ff; color: #1f3c88; }
         .barra { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem; background: #0b1b3a; color: #fff; }
         .marca { font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: #93c5fd; }
         .barra h1 { margin-top: 0.15rem; font-size: 1.15rem; }
@@ -28,7 +33,6 @@
         .contenido { max-width: 32rem; margin: 0 auto; padding: 1rem; }
         .aviso { margin-bottom: 0.75rem; color: #1f3c88; }
         .aviso:empty { display: none; }
-        .seccion { margin: 1.25rem 0 0.5rem; font-size: 0.95rem; color: #64748b; }
         article { margin-top: 0.85rem; padding: 1rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
         .empresa { color: #1f3c88; font-size: 0.85rem; font-weight: 700; }
         article h2 { margin-top: 0.2rem; font-size: 1.15rem; color: #0b1b3a; }
@@ -59,6 +63,32 @@
                     <button class="entrar" type="submit">Iniciar sesión</button>
                 </form>
                 <p id="login-aviso" class="error"></p>
+                <button id="ir-registro" class="enlace" type="button">¿No tenés cuenta? Registrate</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="registro" hidden>
+        <div class="login-caja">
+            <img class="logo" src="logo.jpg" alt="TalentLink">
+            <div class="panel">
+                <h1>Crear cuenta</h1>
+                <p>Registrate como candidato.</p>
+                <form id="form-registro">
+                    <label for="nombre">Nombre</label>
+                    <input id="nombre" type="text" maxlength="45" required>
+                    <label for="apellido">Apellido</label>
+                    <input id="apellido" type="text" maxlength="45" required>
+                    <label for="correo-registro">Correo</label>
+                    <input id="correo-registro" type="email" autocomplete="username" required>
+                    <label for="password-registro">Contraseña</label>
+                    <input id="password-registro" type="password" autocomplete="new-password" minlength="6" required>
+                    <label for="password-confirmacion">Repetir contraseña</label>
+                    <input id="password-confirmacion" type="password" autocomplete="new-password" minlength="6" required>
+                    <button class="entrar" type="submit">Crear cuenta</button>
+                </form>
+                <p id="registro-aviso" class="error"></p>
+                <button id="ir-login" class="enlace" type="button">Ya tengo cuenta</button>
             </div>
         </div>
     </section>
@@ -71,12 +101,17 @@
             </div>
             <button id="salir" type="button">Salir</button>
         </header>
-        <div class="contenido">
+        <div id="vista-ofertas" class="contenido vista">
             <p id="feed-aviso" class="aviso"></p>
             <div id="ofertas"></div>
-            <h2 class="seccion">En este teléfono</h2>
+        </div>
+        <div id="vista-postulaciones" class="contenido vista" hidden>
             <div id="pendientes"></div>
         </div>
+        <nav class="menu">
+            <button id="ir-ofertas" class="activo" type="button">Ofertas</button>
+            <button id="ir-postulaciones" type="button">Postulaciones</button>
+        </nav>
     </section>
 
     <div id="cargando" hidden>
