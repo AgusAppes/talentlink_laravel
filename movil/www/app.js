@@ -7,6 +7,8 @@ const avisoLogin = document.querySelector('#login-aviso');
 const avisoFeed = document.querySelector('#feed-aviso');
 const listaOfertas = document.querySelector('#ofertas');
 const listaPendientes = document.querySelector('#pendientes');
+const capaCarga = document.querySelector('#cargando');
+let cargas = 0;
 
 if (localStorage.getItem('token')) {
     mostrarFeed();
@@ -20,6 +22,7 @@ formLogin.addEventListener('submit', async (evento) => {
     try {
         const datos = await pedir('/api/movil/login', {
             method: 'POST',
+            espera: 'Iniciando sesión...',
             body: {
                 correo: document.querySelector('#correo').value,
                 password: document.querySelector('#password').value,
@@ -45,10 +48,10 @@ document.querySelector('#salir').addEventListener('click', () => {
 // En terminos tecnicos, cuando se abre el feed, se ejecuta esta función
 // y hace un GET asincrónico a /api/movil/ofertas
 async function cargarOfertas() {
-    avisoFeed.textContent = 'Consultando ofertas...';
+    avisoFeed.textContent = '';
 
     try {
-        const datos = await pedir('/api/movil/ofertas');
+        const datos = await pedir('/api/movil/ofertas', { espera: 'Buscando ofertas...' });
         localStorage.setItem('ofertas', JSON.stringify(datos.ofertas));
         datos.ofertas.forEach((oferta) => {
             if (oferta.ya_postulada) {
@@ -77,7 +80,10 @@ async function postular(oferta) {
     avisoFeed.textContent = 'Guardado en el teléfono. Enviando...';
 
     try {
-        const datos = await pedir('/api/movil/ofertas/' + oferta.id + '/postular', { method: 'POST' });
+        const datos = await pedir('/api/movil/ofertas/' + oferta.id + '/postular', {
+            method: 'POST',
+            espera: 'Enviando postulación...',
+        });
         marcarPendiente(oferta, 'enviado');
         marcarOfertaEnviada(oferta.id);
         avisoFeed.textContent = datos.mensaje;
@@ -90,26 +96,46 @@ async function postular(oferta) {
 }
 
 async function pedir(ruta, opciones = {}) {
+    mostrarCarga(opciones.espera || 'Cargando...');
     const token = localStorage.getItem('token');
-    const respuesta = await fetch(SERVIDOR + ruta, {
-        method: opciones.method || 'GET',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: 'Bearer ' + token } : {}),
-        },
-        body: opciones.body ? JSON.stringify(opciones.body) : undefined,
-    });
-    const datos = await respuesta.json().catch(() => ({}));
 
-    if (!respuesta.ok || datos.ok === false) {
-        const mensaje = datos.mensaje
-            || (datos.errors && Object.values(datos.errors)[0][0])
-            || 'No se pudo completar.';
-        throw new Error(mensaje);
+    try {
+        const respuesta = await fetch(SERVIDOR + ruta, {
+            method: opciones.method || 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: 'Bearer ' + token } : {}),
+            },
+            body: opciones.body ? JSON.stringify(opciones.body) : undefined,
+        });
+        const datos = await respuesta.json().catch(() => ({}));
+
+        if (!respuesta.ok || datos.ok === false) {
+            const mensaje = datos.mensaje
+                || (datos.errors && Object.values(datos.errors)[0][0])
+                || 'No se pudo completar.';
+            throw new Error(mensaje);
+        }
+
+        return datos;
+    } finally {
+        ocultarCarga();
     }
+}
 
-    return datos;
+function mostrarCarga(texto) {
+    cargas += 1;
+    capaCarga.querySelector('p').textContent = texto;
+    capaCarga.hidden = false;
+}
+
+function ocultarCarga() {
+    cargas = Math.max(0, cargas - 1);
+
+    if (cargas === 0) {
+        capaCarga.hidden = true;
+    }
 }
 
 function mostrarFeed() {

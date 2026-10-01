@@ -18,6 +18,9 @@
         .aviso { color: #1f3c88; }
         .error { color: #b91c1c; }
         .barra { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+        #cargando { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(244, 246, 251, 0.9); }
+        #cargando[hidden] { display: none; }
+        #cargando p { margin: 0; color: #1f3c88; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -46,6 +49,9 @@
             <div id="pendientes"></div>
         </section>
     </main>
+    <div id="cargando" hidden>
+        <p>Cargando...</p>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
