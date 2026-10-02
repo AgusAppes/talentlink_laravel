@@ -39,6 +39,7 @@ class AuthController extends Controller
             // max:100: indica que el campo no puede tener más de 100 caracteres
             'correo' => ['required', 'email', 'max:100'],
             'password' => ['required'],
+            // Este campo es el captcha de Cloudflare
             'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
                 if (! $this->captchaValido((string) $value, (string) $request->ip())) {
                     $fail('No se pudo verificar el captcha. Volvé a intentar.');
@@ -107,6 +108,7 @@ class AuthController extends Controller
             'password' => ['required', 'min:6', 'confirmed'],
             'fecha_nac' => ['nullable', 'date', 'before:today'],
             'ciudades_id' => ['nullable', 'exists:ciudades,id'],
+            // Este campo es el captcha de Cloudflare
             'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
                 if (! $this->captchaValido((string) $value, (string) $request->ip())) {
                     $fail('No se pudo verificar el captcha. Volvé a intentar.');

@@ -78,7 +78,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                    <div class="cf-turnstile w-100" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="flexible" data-theme="light"></div>
                     @error('cf-turnstile-response')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
