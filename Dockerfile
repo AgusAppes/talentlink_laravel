@@ -1,6 +1,7 @@
 # App Laravel para Render.
 # MySQL (Aiven) y MongoDB (Atlas) son servidores externos:
-# esta imagen solo instala los clientes PHP que se conectan a ellos.
+# esta imagen instala los clientes PHP que se conectan a ellos
+# y Tesseract OCR (la app todavía no lo usa).
 
 FROM composer:2 AS vendor
 
@@ -49,6 +50,8 @@ RUN chmod +x /usr/local/bin/install-php-extensions \
     && a2enmod rewrite \
     && a2enconf laravel \
     && echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa \
     && groupadd -g 1000 rendersecrets \
     && usermod -a -G 1000 www-data \
     && rm -rf /var/lib/apt/lists/*

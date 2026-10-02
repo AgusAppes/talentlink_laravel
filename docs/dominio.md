@@ -294,6 +294,12 @@ Admin tiene todos **excepto** `solicitudes.crear`.
 - Sidebar: mostrar ítem solo si el usuario tiene permiso.
 - No renombrar tablas ni columnas del esquema actual.
 
+### Dependencias de sistema
+
+| Dependencia | Qué es | Dónde está | Uso en la app |
+|-------------|--------|------------|---------------|
+| **Tesseract OCR** | Motor de OCR. Paquetes Debian `tesseract-ocr` (inglés por defecto) y `tesseract-ocr-spa` (español). | Imagen Docker (`Dockerfile`), etapa `php:8.3-apache-bookworm`. | Instalada. Todavía no se llama desde el código. |
+
 ---
 
-*Última actualización: agosto 2026*
+*Última actualización: octubre 2026*
