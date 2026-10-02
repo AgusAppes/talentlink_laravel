@@ -21,5 +21,7 @@
         </div>
     </main>
     @vite(['resources/js/app.js'])
+    <!-- Este script es el captcha de Cloudflare -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>

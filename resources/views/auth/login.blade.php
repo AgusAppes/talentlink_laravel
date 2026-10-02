@@ -33,6 +33,13 @@
                     @enderror
                 </div>
 
+                <div class="mb-3">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                    @error('cf-turnstile-response')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
             </form>
 

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -37,6 +39,11 @@ class AuthController extends Controller
             // max:100: indica que el campo no puede tener más de 100 caracteres
             'correo' => ['required', 'email', 'max:100'],
             'password' => ['required'],
+            'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
+                if (! $this->captchaValido((string) $value, (string) $request->ip())) {
+                    $fail('No se pudo verificar el captcha. Volvé a intentar.');
+                }
+            }],
         ], 
         // Mensajes de error personalizados
         // Estos mensajes se muestran dependiendo cual de las reglas definidas arriba no se cumplen
@@ -46,6 +53,7 @@ class AuthController extends Controller
             'correo.email' => 'El correo no es válido.',
             'correo.max' => 'El correo no puede superar los 100 caracteres.',
             'password.required' => 'La contraseña es obligatoria.',
+            'cf-turnstile-response.required' => 'Confirmá que no sos un robot.',
         ]);
 
         // Auth es un facade de Laravel, un facade es una clase que proporciona acceso a metodos estaticos de una clase
@@ -99,6 +107,11 @@ class AuthController extends Controller
             'password' => ['required', 'min:6', 'confirmed'],
             'fecha_nac' => ['nullable', 'date', 'before:today'],
             'ciudades_id' => ['nullable', 'exists:ciudades,id'],
+            'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
+                if (! $this->captchaValido((string) $value, (string) $request->ip())) {
+                    $fail('No se pudo verificar el captcha. Volvé a intentar.');
+                }
+            }],
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'nombre.max' => 'El nombre no puede superar los 45 caracteres.',
@@ -114,6 +127,7 @@ class AuthController extends Controller
             'fecha_nac.date' => 'La fecha de nacimiento no es válida.',
             'fecha_nac.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
             'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
+            'cf-turnstile-response.required' => 'Confirmá que no sos un robot.',
         ]);
 
         // DB::transaction es un método que permite ejecutar una transacción de base de datos
@@ -140,5 +154,31 @@ class AuthController extends Controller
         return redirect()
             ->route('login')
             ->with('ok', 'Cuenta creada. Iniciá sesión con tu correo y contraseña.');
+    }
+
+    // Esta función comprueba el captcha de Cloudflare del formulario
+    // En terminos tecnicos, se ejecuta al validar el login o el registro
+    // y consulta a Turnstile si el token enviado es válido
+    private function captchaValido(string $token, string $ip): bool
+    {
+        $secreto = config('services.turnstile.secret');
+
+        if (! is_string($secreto) || $secreto === '') {
+            return false;
+        }
+
+        try {
+            $respuesta = Http::asForm()
+                ->timeout(5)
+                ->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                    'secret' => $secreto,
+                    'response' => $token,
+                    'remoteip' => $ip,
+                ]);
+        } catch (Throwable) {
+            return false;
+        }
+
+        return $respuesta->ok() && $respuesta->json('success') === true;
     }
 }
