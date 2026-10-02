@@ -1,2 +1,4 @@
 import './bootstrap';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((elemento) => new bootstrap.Tooltip(elemento));

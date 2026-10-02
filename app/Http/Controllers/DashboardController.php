@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     // Esta función muestra el dashboard del admin
     // En terminos tecnicos, cuando se visita /dashboard, se ejecuta esta función
-    // y sirve dashboard/index.blade.php con las cinco métricas
+    // y sirve dashboard/index.blade.php con las métricas
     public function index()
     {
         return view('dashboard.index', [
@@ -22,15 +22,16 @@ class DashboardController extends Controller
 
     // Esta función devuelve las métricas en JSON
     // En terminos tecnicos, cuando el dashboard pide /dashboard/metricas, se ejecuta esta función
-    // y responde con los cinco conteos para actualizar las tarjetas
+    // y responde con los conteos para actualizar las tarjetas
     public function metricas()
     {
         return response()->json($this->calcularMetricas());
     }
 
-    // Esta función cuenta las cinco métricas del dashboard
+    // Esta función cuenta las métricas del dashboard
     // En terminos tecnicos, cuando se abre el dashboard o se piden las métricas, se ejecuta esta función
-    // y devuelve los conteos de solicitudes, ofertas, postulaciones, candidatos y empresas
+    // y devuelve los conteos de solicitudes, ofertas, postulaciones, candidatos y empresas,
+    // y los candidatos registrados hoy, esta semana y este mes según created_at
     private function calcularMetricas(): array
     {
         return [
@@ -39,6 +40,9 @@ class DashboardController extends Controller
             'postulaciones_pendientes' => Postulacion::query()->where('etapas_id', 1)->count(),
             'candidatos' => Candidato::query()->count(),
             'empresas' => Empresa::query()->count(),
+            'candidatos_hoy' => Candidato::query()->where('created_at', '>=', now()->startOfDay())->count(),
+            'candidatos_semana' => Candidato::query()->where('created_at', '>=', now()->startOfWeek())->count(),
+            'candidatos_mes' => Candidato::query()->where('created_at', '>=', now()->startOfMonth())->count(),
         ];
     }
 }
