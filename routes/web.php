@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permiso:postulaciones.crear')
         ->name('postulaciones.store');
 
+    Route::delete('/ofertas/{oferta}/postular', [PostulacionController::class, 'destroy'])
+        ->middleware('permiso:postulaciones.crear')
+        ->name('postulaciones.destroy');
+
     Route::patch('/postulaciones/{postulacion}/etapa', [PostulacionController::class, 'cambiarEtapa'])
         ->middleware('permiso:postulaciones.gestionar')
         ->name('postulaciones.etapa');

@@ -134,6 +134,42 @@ async function postular(oferta) {
     dibujarPendientes();
 }
 
+// Esta función cancela la postulación en el teléfono y, si ya se envió, también en el servidor
+// En terminos tecnicos, cuando se toca Cancelar, se ejecuta esta función
+// y hace un DELETE asincrónico a /api/movil/ofertas/{id}/postular
+async function cancelar(oferta) {
+    const aviso = document.querySelector('#vista-ofertas').hidden
+        ? document.querySelector('#postulaciones-aviso')
+        : avisoFeed;
+    const local = JSON.parse(localStorage.getItem('pendientes') || '[]')
+        .find((item) => item.id === oferta.id);
+
+    if (local && local.estado === 'pendiente') {
+        quitarPostulacionLocal(oferta.id);
+        aviso.textContent = 'Cancelaste la postulación guardada en el teléfono.';
+        dibujarOfertas(JSON.parse(localStorage.getItem('ofertas') || '[]'));
+        dibujarPendientes();
+        return;
+    }
+
+    try {
+        const datos = await pedir('/api/movil/ofertas/' + oferta.id + '/postular', {
+            method: 'DELETE',
+            espera: 'Cancelando postulación...',
+        });
+        quitarPostulacionLocal(oferta.id);
+        aviso.textContent = datos.mensaje;
+    } catch (error) {
+        if (error.message === 'No tenés una postulación a esta oferta.') {
+            quitarPostulacionLocal(oferta.id);
+        }
+        aviso.textContent = error.message;
+    }
+
+    dibujarOfertas(JSON.parse(localStorage.getItem('ofertas') || '[]'));
+    dibujarPendientes();
+}
+
 async function pedir(ruta, opciones = {}) {
     mostrarCarga(opciones.espera || 'Cargando...');
     const token = localStorage.getItem('token');
@@ -224,6 +260,20 @@ function marcarOfertaEnviada(id) {
     }
 }
 
+function quitarPostulacionLocal(id) {
+    const pendientes = JSON.parse(localStorage.getItem('pendientes') || '[]')
+        .filter((item) => item.id !== id);
+    localStorage.setItem('pendientes', JSON.stringify(pendientes));
+
+    const ofertas = JSON.parse(localStorage.getItem('ofertas') || '[]');
+    const oferta = ofertas.find((item) => item.id === id);
+
+    if (oferta) {
+        oferta.ya_postulada = false;
+        localStorage.setItem('ofertas', JSON.stringify(ofertas));
+    }
+}
+
 function agregar(padre, etiqueta, clase, texto) {
     const nodo = document.createElement(etiqueta);
     if (clase) {
@@ -262,6 +312,12 @@ function dibujarOfertas(ofertas) {
 
         if (oferta.ya_postulada) {
             agregar(tarjeta, 'p', 'estado', 'Ya te postulaste');
+            const boton = document.createElement('button');
+            boton.type = 'button';
+            boton.className = 'cancelar';
+            boton.textContent = 'Cancelar postulación';
+            boton.addEventListener('click', () => cancelar(oferta));
+            tarjeta.append(boton);
         } else if (oferta.requiere_cv) {
             agregar(tarjeta, 'p', 'nota', 'Esta oferta pide CV. Postulate desde la web.');
         } else {
@@ -297,6 +353,13 @@ function dibujarPendientes() {
             boton.addEventListener('click', () => postular(item));
             tarjeta.append(boton);
         }
+
+        const cancelarBoton = document.createElement('button');
+        cancelarBoton.type = 'button';
+        cancelarBoton.className = 'cancelar';
+        cancelarBoton.textContent = 'Cancelar';
+        cancelarBoton.addEventListener('click', () => cancelar(item));
+        tarjeta.append(cancelarBoton);
 
         listaPendientes.append(tarjeta);
     });

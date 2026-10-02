@@ -179,6 +179,32 @@ class MovilController extends Controller
         ]);
     }
 
+    // Esta función cancela la postulación del candidato
+    // En terminos tecnicos, cuando la app envía la cancelación, se ejecuta esta función
+    // y borra su postulación a esa oferta
+    public function cancelar(Request $request, Oferta $oferta): JsonResponse
+    {
+        $candidato = $this->candidatoDesdeToken($request);
+
+        $postulacion = $candidato->postulaciones()
+            ->where('postulaciones.ofertas_id', $oferta->id)
+            ->first();
+
+        if (! $postulacion) {
+            return response()->json([
+                'ok' => false,
+                'mensaje' => 'No tenés una postulación a esta oferta.',
+            ], 422);
+        }
+
+        $postulacion->eliminar();
+
+        return response()->json([
+            'ok' => true,
+            'mensaje' => 'Cancelaste tu postulación.',
+        ]);
+    }
+
     // Esta función guarda el token y lo devuelve a la aplicación
     // En terminos tecnicos, cuando el login o el registro salen bien, se ejecuta esta función
     // y responde el token junto con el nombre del candidato

@@ -19,6 +19,7 @@
                             <th>Modalidad</th>
                             <th>Estado de la oferta</th>
                             <th>Etapa</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -32,6 +33,13 @@
                                 </td>
                                 <td>
                                     <span class="badge rounded-pill {{ match ((int) $postulacion->etapas_id) { 1, 2 => 'text-bg-warning', 3 => 'text-bg-danger', 4 => 'text-bg-success', default => 'text-bg-primary' } }}">{{ $postulacion->etapa->nombre }}</span>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ route('postulaciones.destroy', $postulacion->oferta) }}" onsubmit="return confirm('¿Cancelar esta postulación?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar</button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

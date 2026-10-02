@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Postulacion extends Model
 {
@@ -43,5 +44,17 @@ class Postulacion extends Model
             'postulaciones_id',
             'candidatos_id'
         );
+    }
+
+    // Esta función borra la postulación del candidato
+    // En terminos tecnicos, cuando cancela desde la web o la app, se ejecuta esta función
+    // y elimina el CV del disco y la fila de postulaciones
+    public function eliminar(): void
+    {
+        if ($this->cv) {
+            Storage::disk(config('filesystems.cv_disk'))->delete($this->cv);
+        }
+
+        $this->delete();
     }
 }

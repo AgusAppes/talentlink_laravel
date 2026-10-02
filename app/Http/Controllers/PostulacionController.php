@@ -113,6 +113,30 @@ class PostulacionController extends Controller
             ->with('ok', 'Te postulaste correctamente.');
     }
 
+    // Esta función cancela la postulación del candidato
+    // En terminos tecnicos, cuando envía el formulario de cancelar, se ejecuta esta función
+    // y borra su postulación a esa oferta
+    public function destroy(Request $request, Oferta $oferta)
+    {
+        $candidato = $request->user()->candidato;
+
+        if (! $candidato) {
+            abort(403);
+        }
+
+        $postulacion = $candidato->postulaciones()
+            ->where('postulaciones.ofertas_id', $oferta->id)
+            ->first();
+
+        if (! $postulacion) {
+            return back()->with('error', 'No tenés una postulación a esta oferta.');
+        }
+
+        $postulacion->eliminar();
+
+        return back()->with('ok', 'Cancelaste tu postulación.');
+    }
+
     // Esta función cambia la etapa de una postulación
     // En terminos tecnicos, cuando el admin envía el formulario de una fila, se ejecuta esta función
     // y actualiza etapas_id

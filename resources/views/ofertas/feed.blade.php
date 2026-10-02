@@ -47,7 +47,14 @@
                                 <p class="mb-2"><span class="badge rounded-pill text-bg-primary">Requiere CV</span></p>
                             @endif
                             @if ($postuladas->contains($oferta->id))
-                                <p class="mb-0 mt-auto pt-3"><span class="badge rounded-pill text-bg-success">Ya te postulaste</span></p>
+                                <div class="mt-auto pt-3">
+                                    <p class="mb-2"><span class="badge rounded-pill text-bg-success">Ya te postulaste</span></p>
+                                    <form method="POST" action="{{ route('postulaciones.destroy', $oferta) }}" onsubmit="return confirm('¿Cancelar esta postulación?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar postulación</button>
+                                    </form>
+                                </div>
                             @elseif ($oferta->requiere_cv)
                                 <form class="mt-auto pt-3" method="POST" action="{{ route('postulaciones.store', $oferta) }}" enctype="multipart/form-data">
                                     @csrf

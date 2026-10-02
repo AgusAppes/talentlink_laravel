@@ -42,6 +42,7 @@
         .estado { margin-top: 0.85rem; color: #15803d; font-weight: 600; }
         .nota { margin-top: 0.85rem; color: #64748b; }
         article button { width: 100%; margin-top: 0.9rem; min-height: 2.75rem; border: 0; border-radius: 0.75rem; background: #1f3c88; color: #fff; font-weight: 600; }
+        article button.cancelar { background: #fff; color: #b91c1c; border: 1px solid #fecaca; }
         .vacio { color: #64748b; }
         #cargando { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(244, 246, 251, 0.92); }
         #cargando[hidden] { display: none; }
@@ -106,6 +107,7 @@
             <div id="ofertas"></div>
         </div>
         <div id="vista-postulaciones" class="contenido vista" hidden>
+            <p id="postulaciones-aviso" class="aviso"></p>
             <div id="pendientes"></div>
         </div>
         <nav class="menu">
