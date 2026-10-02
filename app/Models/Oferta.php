@@ -10,8 +10,6 @@ class Oferta extends Model
 {
     protected $table = 'ofertas';
 
-    public $timestamps = false;
-
     protected $fillable = [
         'busquedas_id',
         'personal_rrhh_id',

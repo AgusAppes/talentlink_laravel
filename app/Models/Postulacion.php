@@ -10,8 +10,6 @@ class Postulacion extends Model
 {
     protected $table = 'postulaciones';
 
-    public $timestamps = false;
-
     protected $fillable = [
         'ofertas_id',
         'etapas_id',

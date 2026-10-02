@@ -12,8 +12,6 @@ class Candidato extends Model
 {
     protected $table = 'candidatos';
 
-    public $timestamps = false;
-
     protected $fillable = [
         'usuarios_id',
         'nombre',

@@ -10,8 +10,6 @@ class Busqueda extends Model
 {
     protected $table = 'busquedas';
 
-    public $timestamps = false;
-
     protected $fillable = [
         'nombre_puesto',
         'empresas_id',
