@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Experto\EvaluadorCompatibilidad;
 use App\Models\Busqueda;
 use App\Models\Etapa;
 use App\Models\Oferta;
@@ -98,7 +99,7 @@ class PostulacionController extends Controller
             }
         }
 
-        DB::transaction(function () use ($oferta, $candidato, $rutaCv) {
+        $postulacion = DB::transaction(function () use ($oferta, $candidato, $rutaCv) {
             $postulacion = Postulacion::create([
                 'ofertas_id' => $oferta->id,
                 'etapas_id' => 1,
@@ -106,7 +107,11 @@ class PostulacionController extends Controller
             ]);
 
             $postulacion->candidatos()->attach($candidato->id);
+
+            return $postulacion;
         });
+
+        app(EvaluadorCompatibilidad::class)->guardar($postulacion, $candidato);
 
         return redirect()
             ->route('postulaciones.index')
@@ -154,6 +159,24 @@ class PostulacionController extends Controller
         ]);
 
         return back()->with('ok', 'Etapa actualizada.');
+    }
+
+    // Esta función vuelve a calcular la compatibilidad de una postulación
+    // En terminos tecnicos, cuando el reclutador envía Calcular en el listado, se ejecuta esta función
+    // y guarda el porcentaje y las reglas que se cumplieron
+    public function compatibilidad(Postulacion $postulacion, EvaluadorCompatibilidad $evaluador)
+    {
+        $candidato = $postulacion->candidatos()->first();
+
+        if (! $candidato) {
+            return back()->with('error', 'Esta postulación no tiene candidato.');
+        }
+
+        if (! $evaluador->guardar($postulacion, $candidato)) {
+            return back()->with('error', 'No se pudo calcular la compatibilidad.');
+        }
+
+        return back()->with('ok', 'Se calculó la compatibilidad.');
     }
 
     // Esta función muestra el CV de una postulación

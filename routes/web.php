@@ -92,6 +92,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permiso:postulaciones.gestionar')
         ->name('postulaciones.etapa');
 
+    Route::post('/postulaciones/{postulacion}/compatibilidad', [PostulacionController::class, 'compatibilidad'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.compatibilidad');
+
     Route::middleware('permiso:empresas.editar')->group(function () {
         Route::get('/mi-empresa', [PerfilController::class, 'empresa'])->name('empresas.perfil');
         Route::put('/mi-empresa', [PerfilController::class, 'actualizarEmpresa'])->name('empresas.perfil.update');

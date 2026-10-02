@@ -298,7 +298,7 @@ Admin tiene todos **excepto** `solicitudes.crear`.
 
 | Dependencia | Qué es | Dónde está | Uso en la app |
 |-------------|--------|------------|---------------|
-| **Tesseract OCR** | Motor de OCR. Paquetes Debian `tesseract-ocr` (inglés por defecto) y `tesseract-ocr-spa` (español). | Imagen Docker (`Dockerfile`), etapa `php:8.3-apache-bookworm`. | Instalada. Todavía no se llama desde el código. |
+| **Tesseract OCR** | Motor de OCR. Paquetes Debian `tesseract-ocr`, `tesseract-ocr-spa` y `poppler-utils` (`pdftotext`, `pdftoppm`). | Imagen Docker (`Dockerfile`), etapa `php:8.3-apache-bookworm`. | Al calcular la compatibilidad, si el CV no tiene capa de texto, se leen hasta dos páginas. |
 
 ---
 

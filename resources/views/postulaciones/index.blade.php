@@ -24,6 +24,7 @@
                             <th>Empresa</th>
                             <th>Estado de la oferta</th>
                             <th>Etapa</th>
+                            <th>Compatibilidad</th>
                             <th>CV</th>
                         </tr>
                     </thead>
@@ -56,6 +57,25 @@
                                         </select>
                                         <button class="btn btn-sm btn-outline-secondary flex-shrink-0" type="submit">Guardar</button>
                                     </form>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column align-items-start gap-2">
+                                        <span class="badge rounded-pill {{ $postulacion->claseCompatibilidad() }}">{{ $postulacion->textoCompatibilidad() }}</span>
+                                        @if ($reglas = data_get($postulacion->compatibilidad_detalle, 'reglas'))
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#compat-{{ $postulacion->id }}">Detalle</button>
+                                            <div class="collapse" id="compat-{{ $postulacion->id }}">
+                                                <ul class="small text-secondary mb-0 ps-3">
+                                                    @foreach ($reglas as $regla)
+                                                        <li>{{ $regla }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endif
+                                        <form method="POST" action="{{ route('postulaciones.compatibilidad', $postulacion) }}">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">{{ $postulacion->compatibilidad_detalle ? 'Recalcular' : 'Calcular' }}</button>
+                                        </form>
+                                    </div>
                                 </td>
                                 <td>
                                     @if ($postulacion->cv)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Experto\EvaluadorCompatibilidad;
 use App\Models\Busqueda;
 use App\Models\Candidato;
 use App\Models\Oferta;
@@ -164,14 +165,19 @@ class MovilController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($oferta, $candidato) {
+        $postulacion = DB::transaction(function () use ($oferta, $candidato) {
             $postulacion = Postulacion::create([
                 'ofertas_id' => $oferta->id,
                 'etapas_id' => 1,
             ]);
 
             $postulacion->candidatos()->attach($candidato->id);
+
+            return $postulacion;
         });
+
+        // Este es el evaluador de compatibilidad
+        app(EvaluadorCompatibilidad::class)->guardar($postulacion, $candidato);
 
         return response()->json([
             'ok' => true,

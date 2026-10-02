@@ -15,6 +15,13 @@ class Postulacion extends Model
         'ofertas_id',
         'etapas_id',
         'cv',
+        'compatibilidad',
+        'compatibilidad_detalle',
+    ];
+
+    protected $casts = [
+        'compatibilidad' => 'integer',
+        'compatibilidad_detalle' => 'array',
     ];
 
     // Esta función trae la oferta de la postulación
@@ -44,6 +51,42 @@ class Postulacion extends Model
             'postulaciones_id',
             'candidatos_id'
         );
+    }
+
+    // Esta función arma el texto del porcentaje para el listado
+    // En terminos tecnicos, cuando la tabla de postulaciones muestra la compatibilidad, se ejecuta esta función
+    // y distingue un porcentaje de una evaluación sin datos o todavía no hecha
+    public function textoCompatibilidad(): string
+    {
+        if ($this->compatibilidad !== null) {
+            return $this->compatibilidad.'%';
+        }
+
+        if ($this->compatibilidad_detalle) {
+            return 'Sin datos';
+        }
+
+        return 'Sin evaluar';
+    }
+
+    // Esta función elige el color del badge según el porcentaje
+    // En terminos tecnicos, cuando la tabla pinta la compatibilidad, se ejecuta esta función
+    // y devuelve una clase de Bootstrap
+    public function claseCompatibilidad(): string
+    {
+        if ($this->compatibilidad === null) {
+            return 'text-bg-secondary';
+        }
+
+        if ($this->compatibilidad >= 70) {
+            return 'text-bg-success';
+        }
+
+        if ($this->compatibilidad >= 40) {
+            return 'text-bg-warning';
+        }
+
+        return 'text-bg-danger';
     }
 
     // Esta función borra la postulación del candidato
