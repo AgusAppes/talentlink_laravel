@@ -27,10 +27,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="password">Contraseña</label>
-                    <input class="form-control @error('password') is-invalid @enderror" type="password" id="password" name="password" required>
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" type="password" id="password" name="password" required>
                 </div>
 
                 <div class="mb-3">

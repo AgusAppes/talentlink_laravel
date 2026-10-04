@@ -81,7 +81,7 @@
                                             @php $bloqueo = $evento['bloqueo']; @endphp
                                             <div class="rounded p-1 h-100 {{ $evento['tipo'] === 'agenda' ? 'bg-info-subtle' : 'bg-secondary-subtle' }}">
                                                 <span class="d-block fw-semibold">{{ $evento['tipo'] === 'agenda' ? $bloqueo->nota : 'No disponible' }}</span>
-                                                @if ($evento['tipo'] !== 'agenda' && $bloqueo->nota)
+                                                @if ($evento['tipo'] !== 'agenda' && $bloqueo->nota && $bloqueo->nota !== 'No disponible')
                                                     <span class="d-block">{{ $bloqueo->nota }}</span>
                                                 @endif
                                                 @if (! $bloqueo->esDiaEntero())
@@ -123,10 +123,7 @@
                 <input type="hidden" name="hora_inicio" value="{{ old('hora_inicio') }}">
                 <div class="mb-3">
                     <label class="form-label" for="hora-fin-accion">Hasta</label>
-                    <select class="form-select @error('hora_fin') is-invalid @enderror" id="hora-fin-accion" name="hora_fin"></select>
-                    @error('hora_fin')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <select class="form-select" id="hora-fin-accion" name="hora_fin"></select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="nota-accion">Título o nota</label>

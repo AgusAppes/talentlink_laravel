@@ -52,8 +52,8 @@
                         <tbody>
                             @foreach (\App\Http\Controllers\CalendarioController::DIAS as $dia => $nombre)
                                 @php
-                                    $inicio = $editando ? old("franjas.$dia.0.inicio", '') : ($franjas[$dia][0]['inicio'] ?? '');
-                                    $fin = $editando ? old("franjas.$dia.0.fin", '') : ($franjas[$dia][0]['fin'] ?? '');
+                                    $inicio = $editando ? old("franjas.$dia.inicio", '') : ($franjas[$dia]['inicio'] ?? '');
+                                    $fin = $editando ? old("franjas.$dia.fin", '') : ($franjas[$dia]['fin'] ?? '');
                                     $marcado = $editando ? in_array($dia, array_map('intval', old('dias', [])), true) : $inicio !== '';
                                 @endphp
                                 <tr>
@@ -66,14 +66,14 @@
                                     <td>
                                         <div class="d-flex flex-wrap align-items-center gap-2">
                                             <span>de</span>
-                                            <select class="form-select w-auto hora-horario" name="franjas[{{ $dia }}][0][inicio]" aria-label="Inicio {{ $nombre }}" @disabled(! $editando || ! $marcado)>
+                                            <select class="form-select w-auto hora-horario" name="franjas[{{ $dia }}][inicio]" aria-label="Inicio {{ $nombre }}" @disabled(! $editando || ! $marcado) @required($editando && $marcado)>
                                                 <option value="">—</option>
                                                 @foreach ($horas as $hora)
                                                     <option value="{{ $hora }}" @selected($inicio === $hora)>{{ $hora }}</option>
                                                 @endforeach
                                             </select>
                                             <span>a</span>
-                                            <select class="form-select w-auto hora-horario" name="franjas[{{ $dia }}][0][fin]" aria-label="Fin {{ $nombre }}" @disabled(! $editando || ! $marcado)>
+                                            <select class="form-select w-auto hora-horario" name="franjas[{{ $dia }}][fin]" aria-label="Fin {{ $nombre }}" @disabled(! $editando || ! $marcado) @required($editando && $marcado)>
                                                 <option value="">—</option>
                                                 @foreach ($horas as $hora)
                                                     <option value="{{ $hora }}" @selected($fin === $hora)>{{ $hora }}</option>
@@ -107,6 +107,7 @@
 
             fila.querySelectorAll('select.hora-horario').forEach((campo) => {
                 campo.disabled = !casilla.checked;
+                campo.required = casilla.checked;
             });
         };
 

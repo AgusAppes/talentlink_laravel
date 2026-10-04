@@ -99,6 +99,9 @@ class AuthController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
+    // Esta función crea la cuenta de un candidato
+    // En terminos tecnicos, cuando se envía el formulario de registro, se ejecuta esta función
+    // y guarda el usuario con su perfil si el correo no existe y el captcha es válido
     public function registro(Request $request)
     {
         $datos = $request->validate([
@@ -107,7 +110,6 @@ class AuthController extends Controller
             'correo' => ['required', 'email', 'max:100', 'unique:usuarios,correo'],
             'password' => ['required', 'min:6', 'confirmed'],
             'fecha_nac' => ['nullable', 'date', 'before:today'],
-            'ciudades_id' => ['nullable', 'exists:ciudades,id'],
             // Este campo es el captcha de Cloudflare
             'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
                 if (! $this->captchaValido((string) $value, (string) $request->ip())) {
@@ -128,7 +130,6 @@ class AuthController extends Controller
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'fecha_nac.date' => 'La fecha de nacimiento no es válida.',
             'fecha_nac.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
-            'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
             'cf-turnstile-response.required' => 'Confirmá que no sos un robot.',
         ]);
 

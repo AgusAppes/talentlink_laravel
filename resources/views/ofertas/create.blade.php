@@ -31,25 +31,19 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="estado_ofertas_id">Estado</label>
-                        <select class="form-select @error('estado_ofertas_id') is-invalid @enderror" id="estado_ofertas_id" name="estado_ofertas_id" required>
+                        <select class="form-select" id="estado_ofertas_id" name="estado_ofertas_id" required>
                             @foreach ($estados as $estado)
                                 <option value="{{ $estado->id }}" @selected((string) old('estado_ofertas_id', '1') === (string) $estado->id)>
                                     {{ $estado->nombre }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('estado_ofertas_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input @error('requiere_cv') is-invalid @enderror" type="checkbox" id="requiere_cv" name="requiere_cv" value="1" @checked(old('requiere_cv'))>
+                            <input class="form-check-input" type="checkbox" id="requiere_cv" name="requiere_cv" value="1" @checked(old('requiere_cv'))>
                             <label class="form-check-label" for="requiere_cv">Requerir CV</label>
-                            @error('requiere_cv')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                         <p class="form-text">Si lo marcás, el candidato deberá adjuntar su CV en PDF para postularse.</p>
                     </div>

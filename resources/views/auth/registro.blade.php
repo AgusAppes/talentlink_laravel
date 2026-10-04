@@ -19,18 +19,12 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="nombre">Nombre</label>
-                    <input class="form-control @error('nombre') is-invalid @enderror" type="text" id="nombre" name="nombre" value="{{ old('nombre') }}" maxlength="45" required>
-                    @error('nombre')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" type="text" id="nombre" name="nombre" value="{{ old('nombre') }}" maxlength="45" required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="apellido">Apellido</label>
-                    <input class="form-control @error('apellido') is-invalid @enderror" type="text" id="apellido" name="apellido" value="{{ old('apellido') }}" maxlength="45" required>
-                    @error('apellido')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" type="text" id="apellido" name="apellido" value="{{ old('apellido') }}" maxlength="45" required>
                 </div>
 
                 <div class="mb-3">
@@ -64,7 +58,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="ciudades_id">Ciudad</label>
-                    <select class="form-select @error('ciudades_id') is-invalid @enderror" id="ciudades_id" name="ciudades_id">
+                    <select class="form-select" id="ciudades_id" name="ciudades_id">
                         <option value="">Sin especificar</option>
                         @foreach ($ciudades as $ciudad)
                             <option value="{{ $ciudad->id }}" @selected((string) old('ciudades_id') === (string) $ciudad->id)>
@@ -72,9 +66,6 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('ciudades_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
                 </div>
 
                 <div class="mb-3">

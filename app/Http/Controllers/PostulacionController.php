@@ -154,15 +154,8 @@ class PostulacionController extends Controller
     // y actualiza etapas_id
     public function cambiarEtapa(Request $request, Postulacion $postulacion)
     {
-        $datos = $request->validate([
-            'etapas_id' => ['required', 'exists:etapas,id'],
-        ], [
-            'etapas_id.required' => 'La etapa es obligatoria.',
-            'etapas_id.exists' => 'La etapa seleccionada no es válida.',
-        ]);
-
         $postulacion->update([
-            'etapas_id' => $datos['etapas_id'],
+            'etapas_id' => $request->input('etapas_id'),
         ]);
 
         return back()->with('ok', 'Etapa actualizada.');

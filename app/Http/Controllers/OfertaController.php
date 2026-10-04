@@ -97,20 +97,13 @@ class OfertaController extends Controller
             abort(403);
         }
 
-        $datos = $request->validate([
-            'busquedas_id' => ['required', 'exists:busquedas,id', 'unique:ofertas,busquedas_id'],
-            'estado_ofertas_id' => ['required', 'exists:estado_ofertas,id'],
-            'requiere_cv' => ['nullable', 'boolean'],
+        $request->validate([
+            'busquedas_id' => ['unique:ofertas,busquedas_id'],
         ], [
-            'busquedas_id.required' => 'La solicitud es obligatoria.',
-            'busquedas_id.exists' => 'La solicitud seleccionada no es válida.',
             'busquedas_id.unique' => 'Esa solicitud ya tiene una oferta publicada.',
-            'estado_ofertas_id.required' => 'El estado es obligatorio.',
-            'estado_ofertas_id.exists' => 'El estado seleccionado no es válido.',
-            'requiere_cv.boolean' => 'La opción de requerir CV no es válida.',
         ]);
 
-        $busqueda = Busqueda::query()->findOrFail($datos['busquedas_id']);
+        $busqueda = Busqueda::query()->findOrFail($request->input('busquedas_id'));
 
         if ((int) $busqueda->estado_busqueda_id === 3) {
             return back()
@@ -118,11 +111,11 @@ class OfertaController extends Controller
                 ->withErrors(['busquedas_id' => 'No se puede publicar una solicitud cerrada.']);
         }
 
-        DB::transaction(function () use ($datos, $rrhh, $busqueda, $request) {
+        DB::transaction(function () use ($rrhh, $busqueda, $request) {
             Oferta::create([
-                'busquedas_id' => $datos['busquedas_id'],
+                'busquedas_id' => $request->input('busquedas_id'),
                 'personal_rrhh_id' => $rrhh->id,
-                'estado_ofertas_id' => $datos['estado_ofertas_id'],
+                'estado_ofertas_id' => $request->input('estado_ofertas_id'),
                 'requiere_cv' => $request->boolean('requiere_cv'),
             ]);
 
@@ -154,16 +147,8 @@ class OfertaController extends Controller
     // y actualiza estado_ofertas_id
     public function update(Request $request, Oferta $oferta)
     {
-        $datos = $request->validate([
-            'estado_ofertas_id' => ['required', 'exists:estado_ofertas,id'],
-            'requiere_cv' => ['nullable', 'boolean'],
-        ], [
-            'estado_ofertas_id.required' => 'El estado es obligatorio.',
-            'estado_ofertas_id.exists' => 'El estado seleccionado no es válido.',
-        ]);
-
         $oferta->update([
-            'estado_ofertas_id' => $datos['estado_ofertas_id'],
+            'estado_ofertas_id' => $request->input('estado_ofertas_id'),
             'requiere_cv' => $request->boolean('requiere_cv'),
         ]);
 

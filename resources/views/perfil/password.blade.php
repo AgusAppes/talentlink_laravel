@@ -30,10 +30,7 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="password_confirmation">Repetir nueva contraseña</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" class="form-control @error('password_confirmation') is-invalid @enderror" required>
-                            @error('password_confirmation')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input id="password_confirmation" name="password_confirmation" type="password" class="form-control" required>
                         </div>
 
                         <div class="d-flex gap-2">

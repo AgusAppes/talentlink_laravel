@@ -33,13 +33,6 @@
                 @csrf
                 @method('PUT')
 
-                @error('permisos')
-                    <div class="invalid-feedback d-block mb-3">{{ $message }}</div>
-                @enderror
-                @error('permisos.*')
-                    <div class="invalid-feedback d-block mb-3">{{ $message }}</div>
-                @enderror
-
                 <div class="row g-3 mb-4">
                     @foreach ($prefijos as $prefijo)
                         <div class="col-12 col-md-6 col-lg-4">

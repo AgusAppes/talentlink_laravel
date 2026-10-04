@@ -223,14 +223,9 @@ class EntrevistaController extends Controller
 
         abort_unless($esCandidato || $esReclutador, 403);
 
-        $datos = $request->validate([
-            'motivo' => ['required', 'string', 'max:500'],
-        ], [
-            'motivo.required' => 'El motivo de la cancelación es obligatorio.',
-            'motivo.max' => 'El motivo no puede superar los 500 caracteres.',
-        ]);
+        $motivo = trim((string) $request->input('motivo'));
 
-        $cancelada = DB::transaction(function () use ($entrevista, $esCandidato, $datos) {
+        $cancelada = DB::transaction(function () use ($entrevista, $esCandidato, $motivo) {
             $entrevista = Entrevista::query()->whereKey($entrevista->id)->lockForUpdate()->first();
 
             if (! $entrevista || ! $entrevista->estaActiva()) {
@@ -240,7 +235,7 @@ class EntrevistaController extends Controller
             $entrevista->update([
                 'estado' => Entrevista::CANCELADA,
                 'cancelada_por' => $esCandidato ? 'candidato' : 'reclutador',
-                'motivo' => trim($datos['motivo']),
+                'motivo' => $motivo,
             ]);
 
             $entrevista->postulacion()->update(['etapas_id' => Etapa::ENTREVISTA_CANCELADA]);

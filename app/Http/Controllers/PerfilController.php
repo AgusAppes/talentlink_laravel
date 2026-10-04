@@ -45,28 +45,14 @@ class PerfilController extends Controller
         }
 
         $datos = $request->validate([
-            'nombre' => ['required', 'string', 'max:45'],
-            'apellido' => ['required', 'string', 'max:45'],
             'fecha_nac' => ['nullable', 'date', 'before:today'],
-            'ciudades_id' => ['nullable', 'exists:ciudades,id'],
-            'descripcion' => ['nullable', 'string', 'max:1000'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'habilidades' => ['nullable', 'array', 'max:10'],
-            'habilidades.*' => ['string', 'max:50'],
         ], [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede superar los 45 caracteres.',
-            'apellido.required' => 'El apellido es obligatorio.',
-            'apellido.max' => 'El apellido no puede superar los 45 caracteres.',
             'fecha_nac.date' => 'La fecha de nacimiento no es válida.',
             'fecha_nac.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
-            'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
-            'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
             'foto.image' => 'La foto debe ser una imagen.',
             'foto.mimes' => 'La foto debe ser JPG o PNG.',
             'foto.max' => 'La foto no puede superar los 2 MB.',
-            'habilidades.max' => 'Podés cargar hasta 10 habilidades.',
-            'habilidades.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
         ]);
 
         $foto = $candidato->foto;
@@ -89,11 +75,11 @@ class PerfilController extends Controller
 
         DB::transaction(function () use ($request, $candidato, $datos, $foto) {
             $candidato->update([
-                'nombre' => $datos['nombre'],
-                'apellido' => $datos['apellido'],
-                'fecha_nac' => $datos['fecha_nac'],
-                'ciudades_id' => $datos['ciudades_id'],
-                'descripcion' => $datos['descripcion'],
+                'nombre' => $request->input('nombre'),
+                'apellido' => $request->input('apellido'),
+                'fecha_nac' => $datos['fecha_nac'] ?? null,
+                'ciudades_id' => $request->input('ciudades_id') ?: null,
+                'descripcion' => $request->input('descripcion'),
                 'foto' => $foto,
             ]);
 
@@ -117,33 +103,22 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        $datos = $request->validate([
-            'empresa' => ['required', 'string', 'max:100'],
-            'puesto' => ['nullable', 'string', 'max:100'],
-            'fecha_desde' => ['nullable', 'date_format:Y-m'],
-            'fecha_hasta' => ['nullable', 'date_format:Y-m', 'after_or_equal:fecha_desde'],
-            'descripcion' => ['nullable', 'string', 'max:1000'],
-            'habilidades_experiencia' => ['nullable', 'array', 'max:10'],
-            'habilidades_experiencia.*' => ['string', 'max:50'],
+        $request->validate([
+            'fecha_hasta' => ['nullable', 'after_or_equal:fecha_desde'],
         ], [
-            'empresa.required' => 'El nombre de la empresa es obligatorio.',
-            'empresa.max' => 'El nombre de la empresa no puede superar los 100 caracteres.',
-            'puesto.max' => 'El puesto no puede superar los 100 caracteres.',
-            'fecha_desde.date_format' => 'La fecha de inicio no es válida.',
-            'fecha_hasta.date_format' => 'La fecha de fin no es válida.',
             'fecha_hasta.after_or_equal' => 'La fecha de fin no puede ser anterior a la de inicio.',
-            'descripcion.max' => 'La descripción no puede superar los 1000 caracteres.',
-            'habilidades_experiencia.max' => 'Podés cargar hasta 10 habilidades en la experiencia.',
-            'habilidades_experiencia.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
         ]);
 
+        $desde = $request->input('fecha_desde');
+        $hasta = $request->input('fecha_hasta');
+
         PerfilDocumento::deCandidato((int) $candidato->id)->agregarExperiencia([
-            'empresa' => $datos['empresa'],
-            'puesto' => $datos['puesto'] ?? null,
-            'fecha_desde' => ($datos['fecha_desde'] ?? null) ? $datos['fecha_desde'].'-01' : null,
-            'fecha_hasta' => ($datos['fecha_hasta'] ?? null) ? $datos['fecha_hasta'].'-01' : null,
-            'descripcion' => $datos['descripcion'] ?? null,
-            'habilidades' => $datos['habilidades_experiencia'] ?? [],
+            'empresa' => $request->input('empresa'),
+            'puesto' => $request->input('puesto'),
+            'fecha_desde' => $desde ? $desde.'-01' : null,
+            'fecha_hasta' => $hasta ? $hasta.'-01' : null,
+            'descripcion' => $request->input('descripcion'),
+            'habilidades' => $request->input('habilidades_experiencia', []),
         ]);
 
         return redirect()
@@ -196,15 +171,8 @@ class PerfilController extends Controller
             abort(403);
         }
 
-        $datos = $request->validate([
-            'nombre' => ['required', 'string', 'max:100'],
-        ], [
-            'nombre.required' => 'El nombre de la empresa es obligatorio.',
-            'nombre.max' => 'El nombre no puede superar los 100 caracteres.',
-        ]);
-
         $empresa->update([
-            'nombre' => $datos['nombre'],
+            'nombre' => $request->input('nombre'),
         ]);
 
         return redirect()
@@ -226,12 +194,10 @@ class PerfilController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'password_actual' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:password_actual'],
+            'password_actual' => ['current_password'],
+            'password' => ['min:8', 'confirmed', 'different:password_actual'],
         ], [
-            'password_actual.required' => 'Ingresá tu contraseña actual.',
             'password_actual.current_password' => 'La contraseña actual no es correcta.',
-            'password.required' => 'Ingresá la nueva contraseña.',
             'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'La confirmación no coincide con la nueva contraseña.',
             'password.different' => 'La nueva contraseña tiene que ser distinta de la actual.',

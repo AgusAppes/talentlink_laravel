@@ -15,7 +15,7 @@
             <span class="badge rounded-pill bg-secondary-subtle text-dark">Cancelada</span>
         </div>
 
-        @if ($horas === [])
+        @if ($slots === [])
             <p class="text-secondary mb-0">No hay entrevistas en esta semana.</p>
         @else
         <div class="table-responsive">
@@ -32,13 +32,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($horas as $hora)
+                    @foreach ($slots as $slot)
                         <tr>
-                            <td class="text-nowrap">{{ sprintf('%02d:00', $hora) }}</td>
+                            <td class="text-nowrap">{{ $slot }}</td>
                             @foreach ($dias as $dia)
                                 @php
                                     $clave = $dia->toDateString();
-                                    $turnos = $entrevistasPorHora[$clave][$hora] ?? [];
+                                    $turnos = $entrevistasPorSlot[$clave][$slot] ?? [];
                                 @endphp
                                 <td class="{{ $clave === $hoy ? 'tl-hoy'.($loop->parent->last ? ' tl-hoy-fin' : '') : '' }}">
                                     @foreach ($turnos as $entrevista)

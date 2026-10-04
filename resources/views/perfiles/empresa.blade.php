@@ -22,10 +22,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" for="nombre">Nombre de la empresa</label>
-                    <input class="form-control @error('nombre') is-invalid @enderror" id="nombre" name="nombre" type="text" maxlength="100" value="{{ old('nombre', $empresa->nombre) }}" required>
-                    @error('nombre')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="nombre" name="nombre" type="text" maxlength="100" value="{{ old('nombre', $empresa->nombre) }}" required>
                 </div>
 
                 <div class="d-flex gap-2">

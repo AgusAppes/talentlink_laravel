@@ -130,18 +130,12 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="nombre">Nombre</label>
-                    <input class="form-control @error('nombre') is-invalid @enderror" id="nombre" name="nombre" type="text" maxlength="45" value="{{ old('nombre', $candidato->nombre) }}" required>
-                    @error('nombre')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="nombre" name="nombre" type="text" maxlength="45" value="{{ old('nombre', $candidato->nombre) }}" required>
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="apellido">Apellido</label>
-                    <input class="form-control @error('apellido') is-invalid @enderror" id="apellido" name="apellido" type="text" maxlength="45" value="{{ old('apellido', $candidato->apellido) }}" required>
-                    @error('apellido')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="apellido" name="apellido" type="text" maxlength="45" value="{{ old('apellido', $candidato->apellido) }}" required>
                 </div>
 
                 <div class="col-12 col-md-6">
@@ -154,7 +148,7 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="ciudades_id">Ciudad</label>
-                    <select class="form-select @error('ciudades_id') is-invalid @enderror" id="ciudades_id" name="ciudades_id">
+                    <select class="form-select" id="ciudades_id" name="ciudades_id">
                         <option value="" @selected((string) old('ciudades_id', $candidato->ciudades_id) === '')>Sin especificar</option>
                         @foreach ($ciudades as $ciudad)
                             <option value="{{ $ciudad->id }}" @selected((string) old('ciudades_id', $candidato->ciudades_id) === (string) $ciudad->id)>
@@ -162,22 +156,16 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('ciudades_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="descripcion">Acerca de mí</label>
-                    <textarea class="form-control @error('descripcion') is-invalid @enderror" id="descripcion" name="descripcion" rows="5" maxlength="1000" placeholder="Contá brevemente tu perfil profesional, qué hacés y qué buscás.">{{ old('descripcion', $candidato->descripcion) }}</textarea>
-                    @error('descripcion')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="5" maxlength="1000" placeholder="Contá brevemente tu perfil profesional, qué hacés y qué buscás.">{{ old('descripcion', $candidato->descripcion) }}</textarea>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="tag-input">Habilidades principales</label>
-                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades') || $errors->has('habilidades.*')) is-invalid @endif" data-max="10" data-nombre="habilidades[]">
+                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto" data-max="10" data-nombre="habilidades[]">
                         <div class="tags">
                             @foreach (old('habilidades', $candidato->habilidades->all()) as $habilidad)
                                 <span class="tag">{{ $habilidad }} <button type="button" class="tag-quitar">×</button><input type="hidden" name="habilidades[]" value="{{ $habilidad }}"></span>
@@ -186,14 +174,6 @@
                         <input type="text" id="tag-input" placeholder="Escribí una habilidad y presioná coma o Enter">
                     </div>
                     <div class="form-text">Máximo 10 habilidades.</div>
-                    @error('habilidades')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                    @foreach ($errors->get('habilidades.*') as $mensajes)
-                        @foreach ($mensajes as $mensaje)
-                            <div class="invalid-feedback d-block">{{ $mensaje }}</div>
-                        @endforeach
-                    @endforeach
                 </div>
             </div>
 
@@ -224,26 +204,17 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="empresa">Empresa</label>
-                    <input class="form-control @error('empresa') is-invalid @enderror" id="empresa" name="empresa" type="text" maxlength="100" value="{{ old('empresa') }}" required>
-                    @error('empresa')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="empresa" name="empresa" type="text" maxlength="100" value="{{ old('empresa') }}" required>
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="puesto">Puesto</label>
-                    <input class="form-control @error('puesto') is-invalid @enderror" id="puesto" name="puesto" type="text" maxlength="100" value="{{ old('puesto') }}">
-                    @error('puesto')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="puesto" name="puesto" type="text" maxlength="100" value="{{ old('puesto') }}">
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="fecha_desde">Desde</label>
-                    <input class="form-control @error('fecha_desde') is-invalid @enderror" id="fecha_desde" name="fecha_desde" type="month" value="{{ old('fecha_desde') }}">
-                    @error('fecha_desde')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input class="form-control" id="fecha_desde" name="fecha_desde" type="month" value="{{ old('fecha_desde') }}">
                 </div>
 
                 <div class="col-12 col-md-6">
@@ -257,15 +228,12 @@
 
                 <div class="col-12">
                     <label class="form-label" for="descripcion_experiencia">Descripción</label>
-                    <textarea class="form-control @error('descripcion') is-invalid @enderror" id="descripcion_experiencia" name="descripcion" rows="4" maxlength="1000">{{ old('descripcion') }}</textarea>
-                    @error('descripcion')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <textarea class="form-control" id="descripcion_experiencia" name="descripcion" rows="4" maxlength="1000">{{ old('descripcion') }}</textarea>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="tag-input-experiencia">Habilidades de esta experiencia</label>
-                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto @if ($errors->has('habilidades_experiencia') || $errors->has('habilidades_experiencia.*')) is-invalid @endif" data-max="10" data-nombre="habilidades_experiencia[]">
+                    <div class="tag-campo form-control d-flex flex-wrap align-items-center gap-2 h-auto" data-max="10" data-nombre="habilidades_experiencia[]">
                         <div class="tags">
                             @foreach (old('habilidades_experiencia', []) as $habilidad)
                                 <span class="tag">{{ $habilidad }} <button type="button" class="tag-quitar">×</button><input type="hidden" name="habilidades_experiencia[]" value="{{ $habilidad }}"></span>
@@ -274,14 +242,6 @@
                         <input type="text" id="tag-input-experiencia" placeholder="Escribí una habilidad y presioná coma o Enter">
                     </div>
                     <div class="form-text">Máximo 10 habilidades.</div>
-                    @error('habilidades_experiencia')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                    @foreach ($errors->get('habilidades_experiencia.*') as $mensajes)
-                        @foreach ($mensajes as $mensaje)
-                            <div class="invalid-feedback d-block">{{ $mensaje }}</div>
-                        @endforeach
-                    @endforeach
                 </div>
             </div>
 

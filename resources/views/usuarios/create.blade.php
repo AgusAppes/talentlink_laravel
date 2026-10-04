@@ -13,13 +13,10 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="form-label" for="roles_id">Rol</label>
-                            <select class="form-select @error('roles_id') is-invalid @enderror" id="roles_id" name="roles_id" required>
+                            <select class="form-select" id="roles_id" name="roles_id" required>
                                 <option value="1" @selected((string) old('roles_id', '1') === '1')>Personal RRHH</option>
                                 <option value="2" @selected((string) old('roles_id') === '2')>Empresa</option>
                             </select>
-                            @error('roles_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
 
                         <div class="col-12 col-md-6">

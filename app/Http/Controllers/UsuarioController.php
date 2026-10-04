@@ -40,46 +40,35 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $datos = $request->validate([
-            'roles_id' => ['required', 'in:1,2'],
-            'correo' => ['required', 'email', 'max:100', 'unique:usuarios,correo'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'nombre' => ['required_if:roles_id,1', 'nullable', 'string', 'max:100'],
-            'apellido' => ['required_if:roles_id,1', 'nullable', 'string', 'max:100'],
-            'empresa_nombre' => ['required_if:roles_id,2', 'nullable', 'string', 'max:100'],
+            'correo' => ['unique:usuarios,correo'],
+            'password' => ['min:6', 'confirmed'],
+            'nombre' => ['required_if:roles_id,1'],
+            'apellido' => ['required_if:roles_id,1'],
+            'empresa_nombre' => ['required_if:roles_id,2'],
         ], [
-            'roles_id.required' => 'El rol es obligatorio.',
-            'roles_id.in' => 'El rol seleccionado no es válido.',
-            'correo.required' => 'El correo es obligatorio.',
-            'correo.email' => 'El correo no es válido.',
-            'correo.max' => 'El correo no puede superar los 100 caracteres.',
             'correo.unique' => 'Ese correo ya está registrado.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.string' => 'La contraseña no es válida.',
             'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'nombre.required_if' => 'El nombre es obligatorio para Personal RRHH.',
-            'nombre.max' => 'El nombre no puede superar los 100 caracteres.',
             'apellido.required_if' => 'El apellido es obligatorio para Personal RRHH.',
-            'apellido.max' => 'El apellido no puede superar los 100 caracteres.',
             'empresa_nombre.required_if' => 'El nombre de la empresa es obligatorio.',
-            'empresa_nombre.max' => 'El nombre de la empresa no puede superar los 100 caracteres.',
         ]);
 
-        DB::transaction(function () use ($datos) {
+        DB::transaction(function () use ($datos, $request) {
             $usuario = User::create([
-                'roles_id' => $datos['roles_id'],
-                'correo' => $datos['correo'],
+                'roles_id' => $request->input('roles_id'),
+                'correo' => $request->input('correo'),
                 'password' => Hash::make($datos['password']),
             ]);
 
-            if ((int) $datos['roles_id'] === 1) {
+            if ((int) $request->input('roles_id') === 1) {
                 $usuario->personalRrhh()->create([
                     'nombre' => $datos['nombre'],
                     'apellido' => $datos['apellido'],
                 ]);
             }
 
-            if ((int) $datos['roles_id'] === 2) {
+            if ((int) $request->input('roles_id') === 2) {
                 $usuario->empresa()->create([
                     'nombre' => $datos['empresa_nombre'],
                 ]);
@@ -121,16 +110,7 @@ class UsuarioController extends Controller
     // y sincroniza la tabla permisos_por_roles, sin quitarle al admin usuarios.ver ni usuarios.administrar
     public function actualizarPermisos(Request $request, Rol $rol)
     {
-        $datos = $request->validate([
-            'permisos' => ['nullable', 'array'],
-            'permisos.*' => ['integer', 'exists:permisos,id'],
-        ], [
-            'permisos.array' => 'Los permisos no son válidos.',
-            'permisos.*.integer' => 'Un permiso seleccionado no es válido.',
-            'permisos.*.exists' => 'Un permiso seleccionado no existe.',
-        ]);
-
-        $ids = array_map('intval', $datos['permisos'] ?? []);
+        $ids = array_map('intval', $request->input('permisos', []));
 
         if ((int) $rol->id === 1) {
             $obligatorios = Permiso::query()

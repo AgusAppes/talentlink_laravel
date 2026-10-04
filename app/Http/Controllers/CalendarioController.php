@@ -39,8 +39,12 @@ class CalendarioController extends Controller
             $candidato = $usuario->candidato;
 
             return view('calendario.index', array_merge(
-                $this->armar($fechaActual, null, $candidato->id),
-                ['editar' => false]
+                $this->armarSemana($fechaActual, null, $candidato->id),
+                [
+                    'fechaActual' => $fechaActual,
+                    'hoy' => Carbon::now(self::ZONA)->toDateString(),
+                    'editar' => false,
+                ]
             ));
         }
 
@@ -48,8 +52,10 @@ class CalendarioController extends Controller
         abort_unless($reclutador && $usuario->puede('postulaciones.gestionar'), 403);
 
         return view('calendario.index', array_merge(
-            $this->armar($fechaActual, $reclutador, null),
+            $this->armarSemana($fechaActual, $reclutador, null),
             [
+                'fechaActual' => $fechaActual,
+                'hoy' => Carbon::now(self::ZONA)->toDateString(),
                 'editar' => true,
                 'sinHorario' => $reclutador->disponibilidades()->doesntExist(),
             ]
@@ -69,23 +75,30 @@ class CalendarioController extends Controller
         ]);
     }
 
-    // Esta función guarda el horario semanal
-    // En terminos tecnicos, cuando el reclutador envía el formulario de su perfil, se ejecuta esta función
-    // y reemplaza las filas de disponibilidades
+    // Esta función guarda el horario semanal (disponible/habitual) del reclutador
+    // En terminos tecnicos, cuando el reclutador envía el formulario de /mi-perfil/horario,
+    // se ejecuta esta función, guarda las filas en disponibilidades y redirige al mismo perfil
     public function guardarHorario(Request $request)
     {
         $reclutador = $this->reclutador($request);
 
-        $datos = $request->validate([
-            'dias' => ['nullable', 'array'],
-            'franjas' => ['nullable', 'array'],
-        ]);
-
-        $dias = array_map('intval', $datos['dias'] ?? []);
-        $filas = $this->filasDeHorario($datos['franjas'] ?? [], $dias);
+        // array_map aplica una función a cada elemento de un array
+        // En este caso, la función es intval, que convierte el valor a un entero
+        // Y se usa para convertir a enteros los valores que vienen del formulario como texto
+        $dias = array_map('intval', $request->input('dias', []));
+        // franjas se refiere al intervalo de disponibilidad de cada dia
+        // Es decir hora de inicio y hora de fin
+        // filasDeHorario arma las filas de disponibilidad para cada dia, devuelve un array con dia_semana, hora_inicio y hora_fin
+        $filas = $this->filasDeHorario($request->input('franjas', []), $dias);
 
         DB::transaction(function () use ($reclutador, $filas) {
+            // delete() borra todas las filas de la tabla disponibilidades para el reclutador
+            // Esto se hace para simplificar en caso de que el reclutador ya tenia disponibilidad cargada
+            // Se borra todo lo anterior y se reemplaza por la nueva disponibilidad
             $reclutador->disponibilidades()->delete();
+            // createMany() crea multiples filas en la tabla disponibilidades
+            // recibe un array de arrays, cada array es una fila de la tabla
+            // cada fila tiene los campos dia_semana, hora_inicio y hora_fin
             if ($filas !== []) {
                 $reclutador->disponibilidades()->createMany($filas);
             }
@@ -103,72 +116,36 @@ class CalendarioController extends Controller
     {
         $reclutador = $this->reclutador($request);
 
-        $datos = $request->validate([
-            'fecha' => ['required'],
-            'hora_inicio' => ['nullable'],
-            'hora_fin' => ['nullable'],
-            'nota' => ['nullable'],
-            'tipo' => ['required'],
-            'dia_entero' => ['nullable'],
-        ], [
-            'fecha.required' => 'La fecha es obligatoria.',
-            'tipo.required' => 'Elegí si vas a agendar o marcar no disponible.',
-        ]);
+        $diaEntero = $request->input('dia_entero') === '1';
+        $inicio = $diaEntero ? null : $request->input('hora_inicio');
+        $fin = $diaEntero ? null : $request->input('hora_fin');
+        $nota = trim((string) $request->input('nota'));
+        // Si la nota está vacía, se le asigna el valor 'No disponible'
+        $nota = $nota === '' ? 'No disponible' : $nota;
+        $tipo = $request->input('tipo');
 
-        $diaEntero = ($datos['dia_entero'] ?? null) === '1';
-        $inicio = $diaEntero ? null : $this->normalizarHora($datos['hora_inicio'] ?? null);
-        $fin = $diaEntero ? null : $this->normalizarHora($datos['hora_fin'] ?? null);
-
-        if (($inicio === null) !== ($fin === null)) {
-            throw ValidationException::withMessages([
-                'hora_fin' => 'Completá la hora de inicio y la de fin, o dejá las dos vacías para bloquear el día.',
-            ]);
-        }
-
-        if ($inicio !== null && $this->minutos($fin) <= $this->minutos($inicio)) {
-            throw ValidationException::withMessages([
-                'hora_fin' => 'La hora de fin tiene que ser posterior a la de inicio.',
-            ]);
-        }
-
-        $nota = isset($datos['nota']) ? trim($datos['nota']) : null;
-        $nota = $nota === '' ? null : $nota;
-
-        if ($datos['tipo'] === 'agenda' && $nota === null) {
-            throw ValidationException::withMessages([
-                'nota' => 'Escribí un título para lo que vas a agendar.',
-            ]);
-        }
-
+        // Si el inicio es null, significa que el reclutador marcó el dia entero como no disponible
+        // Se borra todo lo anterior y se crea una fila de bloqueos con el tipo elegido
         if ($inicio === null) {
-            $reclutador->bloqueos()->whereDate('fecha', $datos['fecha'])->delete();
+            $reclutador->bloqueos()->whereDate('fecha', $request->input('fecha'))->delete();
             $reclutador->bloqueos()->create([
-                'fecha' => $datos['fecha'],
+                'fecha' => $request->input('fecha'),
                 'hora_inicio' => null,
                 'hora_fin' => null,
                 'nota' => $nota,
-                'tipo' => $datos['tipo'],
+                'tipo' => $tipo,
             ]);
         } else {
-            $hayDia = $reclutador->bloqueos()
-                ->whereDate('fecha', $datos['fecha'])
-                ->whereNull('hora_inicio')
-                ->exists();
-
-            if ($hayDia) {
-                return back()->with('error', 'Ese día ya está marcado como no disponible.');
-            }
-
             $reclutador->bloqueos()->create([
-                'fecha' => $datos['fecha'],
+                'fecha' => $request->input('fecha'),
                 'hora_inicio' => $inicio,
                 'hora_fin' => $fin,
                 'nota' => $nota,
-                'tipo' => $datos['tipo'],
+                'tipo' => $tipo,
             ]);
         }
 
-        $mensaje = $datos['tipo'] === 'agenda'
+        $mensaje = $tipo === 'agenda'
             ? 'Agendaste ese horario.'
             : 'Marcaste el horario como no disponible.';
 
@@ -226,54 +203,28 @@ class CalendarioController extends Controller
         return $fechaActual->format('Y-m-d') === $fecha ? $fechaActual : $hoy;
     }
 
-    // Esta función arma los datos de la semana
-    // En terminos tecnicos, cuando se dibuja el calendario, se ejecuta esta función
-    // y junta entrevistas, bloqueos y horas de esa semana
-    private function armar(Carbon $fechaActual, ?PersonalRrhh $reclutador, ?int $candidatoId): array
-    {
-        return array_merge(
-            [
-                'fechaActual' => $fechaActual,
-                'hoy' => Carbon::now(self::ZONA)->toDateString(),
-            ],
-            $this->armarSemana($fechaActual, $reclutador, $candidatoId)
-        );
-    }
-
     // Esta función arma la grilla de una semana
-    // En terminos tecnicos, cuando la vista es semana, se ejecuta esta función
-    // y reparte entrevistas y bloqueos en día y hora
+    // En terminos tecnicos, cuando se dibuja el calendario, se ejecuta esta función
+    // y reparte entrevistas y bloqueos en día y media hora
     private function armarSemana(Carbon $fechaActual, ?PersonalRrhh $reclutador, ?int $candidatoId): array
     {
         $inicio = $fechaActual->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
         $fin = $inicio->copy()->addDays(7);
         $dias = [];
 
+        // arma un array con los 7 dias de la semana y los agrega a la variable $dias
         for ($i = 0; $i < 7; $i++) {
             $dias[] = $inicio->copy()->addDays($i);
         }
 
         $entrevistas = $this->entrevistasEntre($inicio, $fin, $reclutador?->id, $candidatoId);
-        $porHora = [];
-
-        foreach ($entrevistas as $entrevista) {
-            $local = $entrevista->inicioLocal();
-            $porHora[$local->toDateString()][$local->hour][] = $entrevista;
-        }
-
-        $horaMin = null;
-        $horaMax = null;
-
-        foreach ($entrevistas as $entrevista) {
-            $local = $entrevista->inicioLocal();
-            $finEntrevista = $entrevista->finLocal();
-            $horaMin = min($horaMin ?? 23, $local->hour);
-            $horaMax = max($horaMax ?? 0, $finEntrevista ? $this->horaTope($finEntrevista->format('H:i')) : $local->hour + 1);
-        }
-
-        $horas = $horaMin === null ? [] : range($horaMin, max($horaMin, $horaMax - 1));
+        // slots son las filas de media hora del calendario
+        // celdas son los espacios (fila, columna) de la grilla
+        // cubiertos son las celdas que ya están cubiertas por una entrevista o un bloqueo
         $grilla = ['slots' => [], 'celdas' => [], 'cubiertos' => []];
+        $entrevistasPorSlot = [];
 
+        // arma los bloqueos y las disponibilidades del reclutador
         if ($reclutador) {
             $bloqueos = $reclutador->bloqueos()
                 ->whereDate('fecha', '>=', $inicio->toDateString())
@@ -281,46 +232,94 @@ class CalendarioController extends Controller
                 ->get();
             $disponibles = $reclutador->disponibilidades()->get()->groupBy('dia_semana');
             $grilla = $this->grilla($dias, $entrevistas, $bloqueos, $disponibles);
+        } else {
+            [$grilla['slots'], $entrevistasPorSlot] = $this->slotsCandidato($entrevistas);
         }
 
         return [
             'inicioSemana' => $inicio,
             'dias' => $dias,
-            'horas' => $horas,
-            'entrevistasPorHora' => $porHora,
             'slots' => $grilla['slots'],
+            'entrevistasPorSlot' => $entrevistasPorSlot,
             'celdas' => $grilla['celdas'],
             'cubiertos' => $grilla['cubiertos'],
         ];
     }
 
+    // Esta función arma las filas de media hora del calendario del candidato
+    // En terminos tecnicos, cuando el candidato abre /calendario, se ejecuta esta función
+    // y ubica cada entrevista en el horario en que empieza
+    private function slotsCandidato($entrevistas): array
+    {
+        $porSlot = [];
+        $minutoMin = null;
+        $minutoMax = null;
+
+        foreach ($entrevistas as $entrevista) {
+            $local = $entrevista->inicioLocal();
+
+            if (! $local) {
+                continue;
+            }
+
+            $minuto = ($local->hour * 60) + $local->minute;
+            $slot = sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60);
+            $porSlot[$local->toDateString()][$slot][] = $entrevista;
+            $minutoMin = min($minutoMin ?? $minuto, $minuto);
+            $minutoMax = max($minutoMax ?? $minuto, $minuto);
+        }
+
+        $slots = [];
+
+        if ($minutoMin !== null) {
+            for ($minuto = $minutoMin; $minuto <= $minutoMax; $minuto += self::DURACION) {
+                $slots[] = sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60);
+            }
+        }
+
+        return [$slots, $porSlot];
+    }
+
     // Esta función arma la semana en turnos de media hora
     // En terminos tecnicos, cuando el reclutador abre el calendario, se ejecuta esta función
     // y ubica entrevistas y bloqueos en la grilla, con el alto según su duración
-    private function grilla(array $dias, $entrevistas, $bloqueos, $disponibles): array
+    // Una collection es un objeto de laravel que contiene una colección de elementos
+    // Se diferencia de un array porque tiene métodos para manipular la colección, como filter, map, etc.
+    private function grilla(array $dias, Collection $entrevistas, Collection $bloqueos, Collection $disponibles): array
     {
-        $desde = 8 * 60;
+        $desde = 6 * 60;
         $hasta = 20 * 60;
         $slots = [];
 
+        // arma un array con las filas de media hora del calendario
         for ($minuto = $desde; $minuto < $hasta; $minuto += 30) {
+            // intdiv($minuto, 60): divide los minutos por 60 y devuelve la parte entera. Obtiene la hora
+            // $minuto % 60: obtiene el resto de la división de los minutos por 60. Obtiene los minutos
+            // sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60): formatea la hora y los minutos en el formato HH:MM
+            // %02d: indica que el número debe tener 2 dígitos. Si el número tiene menos de 2 dígitos, se agrega un 0 al inicio
             $slots[] = sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60);
         }
 
         $celdas = [];
 
+        // recorre los dias de la semana
         foreach ($dias as $dia) {
+            // get(): obtiene la franja de disponibilidad para el dia
             $franjas = $disponibles->get($dia->dayOfWeekIso, collect());
 
+            // recorre las filas de media hora del calendario para ese dia
             foreach ($slots as $slot) {
+                // slotEnFranja verifica si la fila de media hora está en la franja de disponibilidad
                 $celdas[$dia->toDateString()][$slot] = [
                     'disponible' => $this->slotEnFranja($franjas, $this->minutos($slot)),
                 ];
             }
-        }
+        } 
 
+        // arma un array con las entrevistas y los bloqueos
         $eventos = [];
 
+        // recorre las entrevistas y los bloqueos
         foreach ($bloqueos as $bloqueo) {
             if ($bloqueo->esDiaEntero()) {
                 $eventos[] = [
@@ -371,8 +370,8 @@ class CalendarioController extends Controller
         $cubiertos = [];
 
         foreach ($eventos as $evento) {
-            $inicio = max($desde, $this->bajarMedia($evento['inicio']));
-            $fin = min($hasta, $this->subirMedia(max($evento['fin'], $evento['inicio'] + 1)));
+            $inicio = max($desde, $evento['inicio']);
+            $fin = min($hasta, $evento['fin']);
 
             if ($fin <= $inicio) {
                 $fin = min($hasta, $inicio + 30);
@@ -414,9 +413,8 @@ class CalendarioController extends Controller
         ];
     }
 
-    // Esta función dice si una media hora cae en el horario habitual
-    // En terminos tecnicos, cuando se pinta una celda vacía, se ejecuta esta función
-    // y marca las medias horas que el reclutador ofrece para entrevistas
+    // Esta función dice si una celda de media hora cae en el horario habitual
+    // Se usa para marcar las celdas disponibles para entrevistas
     private function slotEnFranja($franjas, int $inicio): bool
     {
         $fin = $inicio + 30;
@@ -428,24 +426,6 @@ class CalendarioController extends Controller
         }
 
         return false;
-    }
-
-    // Esta función baja una hora al turno de media hora anterior
-    // En terminos tecnicos, cuando un turno no empieza en punto o y media, se ejecuta esta función
-    // y lo apoya en la fila de la grilla
-    private function bajarMedia(int $minutos): int
-    {
-        return $minutos - ($minutos % 30);
-    }
-
-    // Esta función sube una hora al turno de media hora siguiente
-    // En terminos tecnicos, cuando un turno no termina en punto o y media, se ejecuta esta función
-    // y estira la fila hasta cubrirlo
-    private function subirMedia(int $minutos): int
-    {
-        $resto = $minutos % 30;
-
-        return $resto === 0 ? $minutos : $minutos + (30 - $resto);
     }
 
     // Esta función trae las entrevistas visibles de un período
@@ -473,7 +453,7 @@ class CalendarioController extends Controller
         })->values();
     }
 
-    // Esta función prepara las dos franjas de cada día para el formulario
+    // Esta función prepara la franja de cada día para el formulario
     // En terminos tecnicos, cuando se muestra el horario habitual, se ejecuta esta función
     // y deja las horas como HH:MM
     private function franjasParaFormulario(PersonalRrhh $reclutador): array
@@ -481,7 +461,7 @@ class CalendarioController extends Controller
         $franjas = [];
 
         foreach ($reclutador->disponibilidades()->orderBy('hora_inicio')->get() as $fila) {
-            $franjas[$fila->dia_semana][] = [
+            $franjas[$fila->dia_semana] = [
                 'inicio' => substr($fila->hora_inicio, 0, 5),
                 'fin' => substr($fila->hora_fin, 0, 5),
             ];
@@ -490,36 +470,37 @@ class CalendarioController extends Controller
         return $franjas;
     }
 
-    // Esta función valida y arma las filas del horario semanal
+    // Esta función devuelve una array con dia_semana, hora_inicio y hora_fin, es decir, arma la fila que se va a guardar en la base de datos
     // En terminos tecnicos, cuando el horario pasa la validación básica, se ejecuta esta función
     // y arma una franja por cada día marcado
+    // :array significa que la función devuelve un array
     private function filasDeHorario(array $franjas, array $dias): array
     {
         $filas = [];
 
+        // self::DIAS es un array que contiene los dias de la semana
+        // Este foreach se ejecuta para cada dia de la semana
         foreach (self::DIAS as $dia => $nombre) {
+
+            // in_array verifica si el dia esta en el array $dias
+            // Si el dia que se está recorriendo no esta en el array $dias que recibe por parametro
+            // se omite el resto del codigo y continua al siguiente dia, es decir, vuelve al inicio del foreach
             if (! in_array($dia, $dias, true)) {
                 continue;
             }
 
-            $inicio = $this->normalizarHora($franjas[$dia][0]['inicio'] ?? null);
-            $fin = $this->normalizarHora($franjas[$dia][0]['fin'] ?? null);
-
-            if ($inicio === null || $fin === null) {
-                throw ValidationException::withMessages([
-                    "franjas.$dia.0.fin" => 'Completá la hora de inicio y la de fin del '.$nombre.'.',
-                ]);
-            }
+            $inicio = $franjas[$dia]['inicio'];
+            $fin = $franjas[$dia]['fin'];
 
             if ($this->minutos($fin) <= $this->minutos($inicio)) {
                 throw ValidationException::withMessages([
-                    "franjas.$dia.0.fin" => 'En el '.$nombre.' la hora de fin tiene que ser posterior a la de inicio.',
+                    "franjas.$dia.fin" => 'En el '.$nombre.' la hora de fin tiene que ser posterior a la de inicio.',
                 ]);
             }
 
             if ($this->minutos($fin) - $this->minutos($inicio) < self::DURACION) {
                 throw ValidationException::withMessages([
-                    "franjas.$dia.0.fin" => 'La franja del '.$nombre.' tiene que cubrir al menos '.self::DURACION.' minutos.',
+                    "franjas.$dia.fin" => 'La franja del '.$nombre.' tiene que cubrir al menos '.self::DURACION.' minutos.',
                 ]);
             }
 
@@ -533,36 +514,13 @@ class CalendarioController extends Controller
         return $filas;
     }
 
-    // Esta función deja una hora como HH:MM:SS
-    // En terminos tecnicos, cuando llega un input time, se ejecuta esta función
-    // y descarta los segundos si vinieron de más
-    private function normalizarHora(?string $hora): ?string
-    {
-        if ($hora === null || $hora === '') {
-            return null;
-        }
-
-        return substr($hora, 0, 5).':00';
-    }
-
-    // Esta función pasa una hora a minutos desde la medianoche
+    // Esta función pasa una hora a minutos desde la medianoche, se usa para comparar horas y decidir si una hora es anterior o posterior a otra
     // En terminos tecnicos, cuando se comparan dos horas, se ejecuta esta función
     // y devuelve la cantidad de minutos
+    // Las horas se comparan en minutos porque es más fácil de manejar y comparar
     private function minutos(string $hora): int
     {
-        [$horas, $minutos] = array_map('intval', explode(':', substr($hora, 0, 5)));
-
-        return ($horas * 60) + $minutos;
-    }
-
-    // Esta función dice hasta qué hora hay que dibujar la grilla
-    // En terminos tecnicos, cuando una franja no termina en punto, se ejecuta esta función
-    // y sube una hora para que el último tramo tenga fila
-    private function horaTope(string $hora): int
-    {
-        [$horas, $minutos] = array_map('intval', explode(':', substr($hora, 0, 5)));
-
-        return $minutos > 0 ? $horas + 1 : $horas;
+        return ((int) substr($hora, 0, 2) * 60) + (int) substr($hora, 3, 2);
     }
 
     // Esta función arma la vuelta al mismo lugar del calendario

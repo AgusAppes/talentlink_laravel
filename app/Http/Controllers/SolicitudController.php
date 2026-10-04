@@ -43,10 +43,6 @@ class SolicitudController extends Controller
     // y sirve solicitudes/create.blade.php con modalidades, provincias y ciudades
     public function create()
     {
-        if (! auth()->user()->empresa) {
-            abort(403);
-        }
-
         $provinciaElegida = old('provincias_id');
 
         if (! $provinciaElegida && old('ciudades_id')) {
@@ -72,33 +68,7 @@ class SolicitudController extends Controller
             abort(403);
         }
 
-        $datos = $request->validate([
-            'nombre_puesto' => ['required', 'string', 'max:100'],
-            'descripcion' => ['nullable', 'string', 'max:500'],
-            'cantidad_vacantes' => ['required', 'integer', 'min:1'],
-            'anios_experiencia' => ['nullable', 'integer', 'min:0'],
-            'modalidades_id' => ['required', 'exists:modalidades,id'],
-            'ciudades_id' => ['nullable', 'exists:ciudades,id'],
-            'habilidades' => ['nullable', 'array', 'max:15'],
-            'habilidades.*' => ['string', 'max:50'],
-        ], [
-            'nombre_puesto.required' => 'El nombre del puesto es obligatorio.',
-            'nombre_puesto.max' => 'El nombre del puesto no puede superar los 100 caracteres.',
-            'descripcion.max' => 'La descripción no puede superar los 500 caracteres.',
-            'cantidad_vacantes.required' => 'La cantidad de vacantes es obligatoria.',
-            'cantidad_vacantes.integer' => 'La cantidad de vacantes debe ser un número.',
-            'cantidad_vacantes.min' => 'La cantidad de vacantes debe ser al menos 1.',
-            'anios_experiencia.integer' => 'Los años de experiencia deben ser un número.',
-            'anios_experiencia.min' => 'Los años de experiencia no pueden ser negativos.',
-            'modalidades_id.required' => 'La modalidad es obligatoria.',
-            'modalidades_id.exists' => 'La modalidad seleccionada no es válida.',
-            'ciudades_id.exists' => 'La ciudad seleccionada no es válida.',
-            'habilidades.array' => 'Las habilidades no son válidas.',
-            'habilidades.max' => 'Podés cargar hasta 15 habilidades.',
-            'habilidades.*.max' => 'Cada habilidad puede tener hasta 50 caracteres.',
-        ]);
-
-        $ciudadId = $datos['ciudades_id'] ?? null;
+        $ciudadId = $request->input('ciudades_id') ?: null;
         $provinciaId = null;
         $paisId = null;
 
@@ -109,21 +79,21 @@ class SolicitudController extends Controller
         }
 
         $busqueda = Busqueda::create([
-            'nombre_puesto' => $datos['nombre_puesto'],
+            'nombre_puesto' => $request->input('nombre_puesto'),
             'empresas_id' => $empresa->id,
             'estado_busqueda_id' => 1,
         ]);
 
         try {
             SolicitudDocumento::guardar($busqueda->id, [
-                'descripcion' => $datos['descripcion'] ?? null,
-                'cantidad_vacantes' => $datos['cantidad_vacantes'],
-                'anios_experiencia' => $datos['anios_experiencia'] ?? null,
-                'modalidades_id' => $datos['modalidades_id'],
+                'descripcion' => $request->input('descripcion'),
+                'cantidad_vacantes' => $request->input('cantidad_vacantes'),
+                'anios_experiencia' => $request->input('anios_experiencia'),
+                'modalidades_id' => $request->input('modalidades_id'),
                 'ciudades_id' => $ciudadId,
                 'provincias_id' => $provinciaId,
                 'paises_id' => $paisId,
-                'habilidades' => $datos['habilidades'] ?? [],
+                'habilidades' => $request->input('habilidades', []),
             ]);
         } catch (\Throwable $e) {
             $busqueda->delete();
@@ -141,15 +111,8 @@ class SolicitudController extends Controller
     // y actualiza estado_busqueda_id
     public function cambiarEstado(Request $request, Busqueda $busqueda)
     {
-        $datos = $request->validate([
-            'estado_busqueda_id' => ['required', 'exists:estado_busqueda,id'],
-        ], [
-            'estado_busqueda_id.required' => 'El estado es obligatorio.',
-            'estado_busqueda_id.exists' => 'El estado seleccionado no es válido.',
-        ]);
-
         $busqueda->update([
-            'estado_busqueda_id' => $datos['estado_busqueda_id'],
+            'estado_busqueda_id' => $request->input('estado_busqueda_id'),
         ]);
 
         return back()->with('ok', 'Estado actualizado.');
