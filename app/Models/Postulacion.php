@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Postulacion extends Model
@@ -43,6 +44,26 @@ class Postulacion extends Model
     // Esta función trae los candidatos de la postulación
     // En terminos tecnicos, cuando el listado muestra el nombre, se ejecuta esta función
     // y usa la tabla postulaciones_por_candidatos
+    // Esta función trae las entrevistas de la postulación
+    // En terminos tecnicos, cuando el listado muestra el turno, se ejecuta esta función
+    // y busca las filas de entrevistas con este postulaciones_id
+    public function entrevistas(): HasMany
+    {
+        return $this->hasMany(Entrevista::class, 'postulaciones_id');
+    }
+
+    // Esta función devuelve la solicitud o entrevista que sigue en curso
+    // En terminos tecnicos, cuando la postulación muestra Solicitar o Cancelar, se ejecuta esta función
+    // y se queda con la fila en estado solicitada o confirmada
+    public function entrevistaActiva(): ?Entrevista
+    {
+        $entrevistas = $this->relationLoaded('entrevistas')
+            ? $this->entrevistas
+            : $this->entrevistas()->get();
+
+        return $entrevistas->first(fn (Entrevista $entrevista) => $entrevista->estaActiva());
+    }
+
     public function candidatos(): BelongsToMany
     {
         return $this->belongsToMany(

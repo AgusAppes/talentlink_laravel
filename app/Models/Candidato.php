@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Candidato extends Model
@@ -92,6 +93,14 @@ class Candidato extends Model
         }
 
         return $storage->url($this->foto);
+    }
+
+    // Esta función trae las entrevistas del candidato
+    // En terminos tecnicos, cuando su calendario lista los turnos, se ejecuta esta función
+    // y busca las filas de entrevistas con este candidatos_id
+    public function entrevistas(): HasMany
+    {
+        return $this->hasMany(Entrevista::class, 'candidatos_id');
     }
 
     public function postulaciones(): BelongsToMany

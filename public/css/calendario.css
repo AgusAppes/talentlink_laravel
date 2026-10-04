@@ -1,0 +1,40 @@
+.tl-grilla {
+    max-height: 70vh;
+    overflow: auto;
+}
+
+.tl-grilla thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--bs-body-bg);
+}
+
+.tl-grilla tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--bs-body-bg);
+}
+
+.tl-grilla td,
+.tl-grilla tbody th {
+    height: 1.75rem;
+    min-width: 6.5rem;
+    padding: 0;
+}
+
+.table td.tl-hoy,
+.table th.tl-hoy {
+    border-left: 2px solid rgba(37, 99, 235, 0.7) !important;
+    border-right: 2px solid rgba(37, 99, 235, 0.7) !important;
+}
+
+.table th.tl-hoy-inicio {
+    border-top: 2px solid rgba(37, 99, 235, 0.7) !important;
+}
+
+.table td.tl-hoy-fin,
+.table th.tl-hoy-fin {
+    border-bottom: 2px solid rgba(37, 99, 235, 0.7) !important;
+}

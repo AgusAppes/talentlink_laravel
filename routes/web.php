@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\CandidatoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EntrevistaController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PostulacionController;
@@ -91,6 +93,42 @@ Route::middleware('auth')->group(function () {
     Route::patch('/postulaciones/{postulacion}/etapa', [PostulacionController::class, 'cambiarEtapa'])
         ->middleware('permiso:postulaciones.gestionar')
         ->name('postulaciones.etapa');
+
+    Route::get('/mi-perfil/horario', [CalendarioController::class, 'horario'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('perfil.horario');
+
+    Route::put('/mi-perfil/horario', [CalendarioController::class, 'guardarHorario'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('perfil.horario.update');
+
+    Route::get('/calendario', [CalendarioController::class, 'index'])
+        ->middleware('permiso:postulaciones.ver|postulaciones.gestionar')
+        ->name('calendario');
+
+    Route::post('/calendario/bloqueos', [CalendarioController::class, 'guardarBloqueo'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('calendario.bloqueos.store');
+
+    Route::delete('/calendario/bloqueos/{bloqueo}', [CalendarioController::class, 'eliminarBloqueo'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('calendario.bloqueos.destroy');
+
+    Route::post('/postulaciones/{postulacion}/entrevista', [EntrevistaController::class, 'store'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('entrevistas.store');
+
+    Route::get('/postulaciones/{postulacion}/entrevista', [EntrevistaController::class, 'elegir'])
+        ->middleware('permiso:postulaciones.crear')
+        ->name('entrevistas.elegir');
+
+    Route::post('/postulaciones/{postulacion}/entrevista/confirmar', [EntrevistaController::class, 'confirmar'])
+        ->middleware('permiso:postulaciones.crear')
+        ->name('entrevistas.confirmar');
+
+    Route::post('/entrevistas/{entrevista}/cancelar', [EntrevistaController::class, 'cancelar'])
+        ->middleware('permiso:postulaciones.ver|postulaciones.gestionar')
+        ->name('entrevistas.cancelar');
 
     Route::post('/postulaciones/{postulacion}/compatibilidad', [PostulacionController::class, 'compatibilidad'])
         ->middleware('permiso:postulaciones.gestionar')

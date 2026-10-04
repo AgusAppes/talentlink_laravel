@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Experto\EvaluadorCompatibilidad;
 use App\Models\Busqueda;
+use App\Models\Entrevista;
 use App\Models\Etapa;
 use App\Models\Oferta;
 use App\Models\Postulacion;
@@ -30,6 +31,9 @@ class PostulacionController extends Controller
                     'etapa',
                     'oferta.estado',
                     'oferta.busqueda.empresa',
+                    'entrevistas' => function ($consulta) {
+                        $consulta->whereIn('estado', [Entrevista::SOLICITADA, Entrevista::CONFIRMADA]);
+                    },
                 ])
                 ->orderByDesc('id')
                 ->get();
@@ -46,6 +50,9 @@ class PostulacionController extends Controller
                     'etapa',
                     'oferta.estado',
                     'oferta.busqueda.empresa',
+                    'entrevistas' => function ($consulta) {
+                        $consulta->whereIn('estado', [Entrevista::SOLICITADA, Entrevista::CONFIRMADA]);
+                    },
                 ])
                 ->orderByDesc('id')
                 ->paginate(10)

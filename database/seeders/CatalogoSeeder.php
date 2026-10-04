@@ -42,6 +42,8 @@ class CatalogoSeeder extends Seeder
             [2, 'En revisión'],
             [3, 'Rechazada'],
             [4, 'Aprobada'],
+            [5, 'En entrevista'],
+            [6, 'Entrevista cancelada'],
         ]);
     }
 

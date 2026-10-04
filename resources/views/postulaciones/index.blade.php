@@ -24,6 +24,7 @@
                             <th>Empresa</th>
                             <th>Estado de la oferta</th>
                             <th>Etapa</th>
+                            <th>Entrevista</th>
                             <th>Compatibilidad</th>
                             <th>CV</th>
                         </tr>
@@ -44,7 +45,7 @@
                                     <span class="badge rounded-pill {{ match ((int) $postulacion->oferta->estado_ofertas_id) { 1 => 'text-bg-success', 2, 3 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $postulacion->oferta->estado->nombre }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge rounded-pill {{ match ((int) $postulacion->etapas_id) { 1, 2 => 'text-bg-warning', 3 => 'text-bg-danger', 4 => 'text-bg-success', default => 'text-bg-primary' } }}">{{ $postulacion->etapa->nombre }}</span>
+                                    <span class="badge rounded-pill {{ match ((int) $postulacion->etapas_id) { 1, 2 => 'text-bg-warning', 3 => 'text-bg-danger', 4 => 'text-bg-success', 5 => 'text-bg-primary', 6 => 'text-bg-secondary', default => 'text-bg-primary' } }}">{{ $postulacion->etapa->nombre }}</span>
                                     <form class="d-flex gap-2 align-items-center mt-2" method="POST" action="{{ route('postulaciones.etapa', $postulacion) }}">
                                         @csrf
                                         @method('PATCH')
@@ -57,6 +58,29 @@
                                         </select>
                                         <button class="btn btn-sm btn-outline-secondary flex-shrink-0" type="submit">Guardar</button>
                                     </form>
+                                </td>
+                                <td>
+                                    @if (auth()->user()->personalRrhh)
+                                        @php $activa = $postulacion->entrevistaActiva(); @endphp
+                                        @if (! $activa)
+                                            <form method="POST" action="{{ route('entrevistas.store', $postulacion) }}">
+                                                @csrf
+                                                <button class="btn btn-sm btn-primary" type="submit">Solicitar entrevista</button>
+                                            </form>
+                                        @elseif ($activa->estado === 'solicitada')
+                                            <p class="small text-secondary mb-1">Esperando que el candidato elija horario.</p>
+                                            @if ((int) $activa->personal_rrhh_id === (int) auth()->user()->personalRrhh->id)
+                                                @include('entrevistas.cancelar', ['entrevista' => $activa])
+                                            @endif
+                                        @else
+                                            <p class="small mb-1">{{ $activa->inicioLocal()->format('d/m/Y H:i') }} · {{ $activa->duracion_minutos }} min</p>
+                                            @if ((int) $activa->personal_rrhh_id === (int) auth()->user()->personalRrhh->id)
+                                                @include('entrevistas.cancelar', ['entrevista' => $activa])
+                                            @endif
+                                        @endif
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column align-items-start gap-2">

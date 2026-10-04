@@ -42,6 +42,14 @@
                 </a>
             @endif
 
+            @if (auth()->user()->puede('postulaciones.gestionar') || (auth()->user()->esCandidato() && auth()->user()->puede('postulaciones.ver')))
+                <a href="{{ route('calendario') }}" class="nav-link {{ request()->routeIs('calendario') ? 'active' : '' }}">Calendario</a>
+            @endif
+
+            @if (auth()->user()->esAdmin() && auth()->user()->personalRrhh)
+                <a href="{{ route('perfil.horario') }}" class="nav-link {{ request()->routeIs('perfil.horario') ? 'active' : '' }}">Mi perfil</a>
+            @endif
+
             @if (auth()->user()->esCandidato() && auth()->user()->puede('candidatos.editar'))
                 <a href="{{ route('candidatos.perfil') }}" class="nav-link {{ request()->routeIs('candidatos.perfil') ? 'active' : '' }}">Mi perfil</a>
             @endif
