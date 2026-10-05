@@ -288,7 +288,7 @@ class CalendarioController extends Controller
     private function grilla(array $dias, Collection $entrevistas, Collection $bloqueos, Collection $disponibles): array
     {
         $desde = 6 * 60;
-        $hasta = 20 * 60;
+        $hasta = 22 * 60;
         $slots = [];
 
         // arma un array con las filas de media hora del calendario

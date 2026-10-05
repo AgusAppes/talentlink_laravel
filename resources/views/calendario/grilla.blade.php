@@ -154,7 +154,7 @@
             const campo = modal.querySelector('[name=hora_fin]');
             const partes = inicio.split(':').map(Number);
             let actual = (partes[0] * 60) + partes[1] + 30;
-            const limite = 20 * 60;
+            const limite = 22 * 60;
 
             campo.innerHTML = '';
 
