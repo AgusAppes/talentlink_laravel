@@ -74,6 +74,7 @@
                                                 @if ($entrevista->estado === 'cancelada')
                                                     <span class="d-block">{{ $entrevista->textoCancelacion() }}</span>
                                                 @else
+                                                    @include('entrevistas.enlace', ['entrevista' => $entrevista])
                                                     @include('entrevistas.cancelar', ['entrevista' => $entrevista])
                                                 @endif
                                             </div>

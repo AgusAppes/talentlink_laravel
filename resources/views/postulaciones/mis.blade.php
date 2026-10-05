@@ -42,6 +42,7 @@
                                             @include('entrevistas.cancelar', ['entrevista' => $activa])
                                         @elseif ($activa)
                                             <p class="small mb-0">{{ $activa->inicioLocal()->format('d/m/Y H:i') }} · {{ $activa->duracion_minutos }} min</p>
+                                            @include('entrevistas.enlace', ['entrevista' => $activa])
                                             @include('entrevistas.cancelar', ['entrevista' => $activa])
                                         @endif
                                         <form method="POST" action="{{ route('postulaciones.destroy', $postulacion->oferta) }}" onsubmit="return confirm('¿Cancelar esta postulación?')">

@@ -82,6 +82,7 @@
                                             @endif
                                         @else
                                             <p class="small mb-1">{{ $activa->inicioLocal()->format('d/m/Y H:i') }} · {{ $activa->duracion_minutos }} min</p>
+                                            @include('entrevistas.enlace', ['entrevista' => $activa])
                                             @if ((int) $activa->personal_rrhh_id === (int) auth()->user()->personalRrhh->id)
                                                 @include('entrevistas.cancelar', ['entrevista' => $activa])
                                             @endif

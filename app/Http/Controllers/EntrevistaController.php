@@ -9,6 +9,7 @@ use App\Models\Postulacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EntrevistaController extends Controller
 {
@@ -149,9 +150,9 @@ class EntrevistaController extends Controller
         return $inicio;
     }
 
-    // Esta función confirma el turno que eligió el candidato
+    // Esta función confirma el turno que eligió el candidato y arma el link de la reunión
     // En terminos tecnicos, cuando envía un horario de la lista, se ejecuta esta función
-    // y vuelve a comprobar que siga libre antes de guardarlo
+    // y vuelve a comprobar que siga libre antes de guardarlo y el enlace de Jitsi
     public function confirmar(Request $request, Postulacion $postulacion, CalendarioController $huecos)
     {
         $candidato = $request->user()->candidato;
@@ -197,6 +198,7 @@ class EntrevistaController extends Controller
                 'estado' => Entrevista::CONFIRMADA,
                 'inicio' => $inicio->copy()->utc(),
                 'duracion_minutos' => CalendarioController::DURACION,
+                'enlace' => 'https://meet.jit.si/TalentLink-'.Str::lower(Str::random(20)),
             ]);
 
             return 'ok';

@@ -26,6 +26,7 @@ class Entrevista extends Model
         'estado',
         'cancelada_por',
         'motivo',
+        'enlace',
     ];
 
     protected $casts = [
