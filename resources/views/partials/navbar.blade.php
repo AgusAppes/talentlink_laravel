@@ -14,18 +14,17 @@
                 </svg>
                 <span id="campana-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger {{ $notificaciones->isEmpty() ? 'd-none' : '' }}">{{ $notificaciones->count() }}</span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end" id="campana-lista">
+            <ul class="dropdown-menu dropdown-menu-end overflow-hidden p-0" id="campana-lista">
                 @forelse ($notificaciones as $notificacion)
-                    <li><span class="dropdown-item-text small text-wrap" data-aviso>{{ $notificacion->texto }}</span></li>
+                    <li class="border-bottom"><span class="dropdown-item-text small text-wrap py-2 lh-sm" data-aviso>{{ $notificacion->texto }}</span></li>
                 @empty
-                    <li><span class="dropdown-item-text small text-secondary">No tenés notificaciones.</span></li>
+                    <li><span class="dropdown-item-text small text-secondary py-2">No tenés notificaciones.</span></li>
                 @endforelse
                 @if ($notificaciones->isNotEmpty())
-                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <form method="POST" action="{{ route('notificaciones.leer') }}">
                             @csrf
-                            <button class="dropdown-item" type="submit">Marcar leídas</button>
+                            <button class="dropdown-item text-center small text-primary py-2" type="submit">Marcar leídas</button>
                         </form>
                     </li>
                 @endif
@@ -88,7 +87,7 @@
                     if (textos.length === 0) {
                         var vacio = document.createElement('li');
                         var avisoVacio = document.createElement('span');
-                        avisoVacio.className = 'dropdown-item-text small text-secondary';
+                        avisoVacio.className = 'dropdown-item-text small text-secondary py-2';
                         avisoVacio.textContent = 'No tenés notificaciones.';
                         vacio.appendChild(avisoVacio);
                         lista.appendChild(vacio);
@@ -97,17 +96,14 @@
 
                     textos.forEach(function (texto) {
                         var item = document.createElement('li');
+                        item.className = 'border-bottom';
                         var aviso = document.createElement('span');
-                        aviso.className = 'dropdown-item-text small text-wrap';
+                        aviso.className = 'dropdown-item-text small text-wrap py-2 lh-sm';
                         aviso.dataset.aviso = '';
                         aviso.textContent = texto;
                         item.appendChild(aviso);
                         lista.appendChild(item);
                     });
-
-                    var separador = document.createElement('li');
-                    separador.innerHTML = '<hr class="dropdown-divider">';
-                    lista.appendChild(separador);
 
                     var accion = document.createElement('li');
                     var formulario = document.createElement('form');
@@ -120,7 +116,7 @@
                     token.value = '{{ csrf_token() }}';
 
                     var enviar = document.createElement('button');
-                    enviar.className = 'dropdown-item';
+                    enviar.className = 'dropdown-item text-center small text-primary py-2';
                     enviar.type = 'submit';
                     enviar.textContent = 'Marcar leídas';
 

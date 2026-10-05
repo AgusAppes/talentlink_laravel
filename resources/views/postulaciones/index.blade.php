@@ -15,6 +15,10 @@
                 <div class="invalid-feedback d-block px-3 pt-3">{{ $message }}</div>
             @enderror
 
+            @if (auth()->user()->personalRrhh && ! $tieneHorario)
+                <p class="text-secondary small px-3 pt-3 mb-0">Todavía no cargaste tus horarios. Guardalos en <a href="{{ route('perfil.horario') }}">Mi perfil</a> para poder solicitar entrevistas.</p>
+            @endif
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
@@ -63,10 +67,14 @@
                                     @if (auth()->user()->personalRrhh)
                                         @php $activa = $postulacion->entrevistaActiva(); @endphp
                                         @if (! $activa)
-                                            <form method="POST" action="{{ route('entrevistas.store', $postulacion) }}">
-                                                @csrf
-                                                <button class="btn btn-sm btn-primary" type="submit">Solicitar entrevista</button>
-                                            </form>
+                                            @if ($tieneHorario)
+                                                <form method="POST" action="{{ route('entrevistas.store', $postulacion) }}">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-primary" type="submit">Solicitar entrevista</button>
+                                                </form>
+                                            @else
+                                                <button class="btn btn-sm btn-primary" type="button" disabled>Solicitar entrevista</button>
+                                            @endif
                                         @elseif ($activa->estado === 'solicitada')
                                             <p class="small text-secondary mb-1">Esperando que el candidato elija horario.</p>
                                             @if ((int) $activa->personal_rrhh_id === (int) auth()->user()->personalRrhh->id)

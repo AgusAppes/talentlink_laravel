@@ -44,6 +44,8 @@ class PostulacionController extends Controller
             return view('postulaciones.mis', compact('postulaciones'));
         }
 
+        $reclutador = $usuario->personalRrhh;
+
         return view('postulaciones.index', [
             'postulaciones' => Postulacion::query()
                 ->with([
@@ -59,6 +61,7 @@ class PostulacionController extends Controller
                 ->paginate(10)
                 ->withQueryString(),
             'etapas' => Etapa::query()->orderBy('id')->get(),
+            'tieneHorario' => $reclutador !== null && $reclutador->disponibilidades()->exists(),
         ]);
     }
 

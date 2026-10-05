@@ -34,6 +34,23 @@
                 @endif
             </div>
 
+            @php
+                $meses = [
+                    1 => 'enero',
+                    2 => 'febrero',
+                    3 => 'marzo',
+                    4 => 'abril',
+                    5 => 'mayo',
+                    6 => 'junio',
+                    7 => 'julio',
+                    8 => 'agosto',
+                    9 => 'septiembre',
+                    10 => 'octubre',
+                    11 => 'noviembre',
+                    12 => 'diciembre',
+                ];
+            @endphp
+
             <div class="table-responsive tl-grilla">
                 <table class="table table-bordered mb-0 small">
                     <thead>
@@ -55,15 +72,13 @@
                                     @php
                                         $clave = $dia->toDateString().' '.$slot;
                                         $libre = $libres[$clave] ?? false;
-                                        $cuando = \App\Http\Controllers\CalendarioController::DIAS[$dia->dayOfWeekIso].' '.$dia->format('d/m').' · '.$slot;
+                                        $fin = \Illuminate\Support\Carbon::createFromFormat('H:i', $slot)->addMinutes(\App\Http\Controllers\CalendarioController::DURACION)->format('H:i');
+                                        $diaNombre = mb_strtolower(\App\Http\Controllers\CalendarioController::DIAS[$dia->dayOfWeekIso], 'UTF-8');
+                                        $cuando = $diaNombre.' '.$dia->format('d').' de '.$meses[(int) $dia->format('n')].' de '.$slot.' a '.$fin.' hs';
                                     @endphp
                                     <td class="{{ $libre ? 'bg-white' : 'bg-secondary-subtle' }}">
                                         @if ($libre)
-                                            <form class="h-100" method="POST" action="{{ route('entrevistas.confirmar', $postulacion) }}">
-                                                @csrf
-                                                <input type="hidden" name="inicio" value="{{ $clave }}">
-                                                <button class="btn w-100 h-100 rounded-0 border-0 p-0" type="submit" aria-label="{{ $cuando }}"></button>
-                                            </form>
+                                            <button class="btn w-100 h-100 rounded-0 border-0 p-0" type="button" data-bs-toggle="modal" data-bs-target="#confirmarEntrevista" data-inicio="{{ $clave }}" data-cuando="{{ $cuando }}" aria-label="{{ $cuando }}"></button>
                                         @endif
                                     </td>
                                 @endforeach
@@ -74,4 +89,41 @@
             </div>
         </div>
     </section>
+
+    <div class="modal fade" id="confirmarEntrevista" tabindex="-1" aria-labelledby="confirmarEntrevistaTitulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" method="POST" action="{{ route('entrevistas.confirmar', $postulacion) }}">
+                @csrf
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="confirmarEntrevistaTitulo">Entrevista {{ $postulacion->oferta->busqueda->nombre_puesto }}</h2>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" data-cuando></p>
+                    <input type="hidden" name="inicio" value="">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" type="submit">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        const modal = document.getElementById('confirmarEntrevista');
+
+        modal?.addEventListener('show.bs.modal', (evento) => {
+            const boton = evento.relatedTarget;
+
+            if (!boton) {
+                return;
+            }
+
+            modal.querySelector('[name=inicio]').value = boton.dataset.inicio;
+            modal.querySelector('[data-cuando]').textContent = boton.dataset.cuando;
+        });
+    </script>
+@endpush
