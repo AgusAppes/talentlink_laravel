@@ -74,6 +74,10 @@
     line-height: 1;
 }
 
+.tl-campana .dropdown-menu {
+    width: 18rem;
+}
+
 .tag {
     display: inline-flex;
     align-items: center;

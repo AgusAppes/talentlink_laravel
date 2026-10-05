@@ -6,6 +6,8 @@ use App\Models\Busqueda;
 use App\Models\Ciudad;
 use App\Models\EstadoBusqueda;
 use App\Models\Modalidad;
+use App\Models\Notificacion;
+use App\Models\PersonalRrhh;
 use App\Models\Provincia;
 use App\Models\SolicitudDocumento;
 use Illuminate\Http\Request;
@@ -99,6 +101,13 @@ class SolicitudController extends Controller
             $busqueda->delete();
 
             throw $e;
+        }
+
+        foreach (PersonalRrhh::query()->pluck('usuarios_id') as $usuariosId) {
+            Notificacion::avisar(
+                $usuariosId,
+                $empresa->nombre.' cargó una solicitud para '.$busqueda->nombre_puesto.'.'
+            );
         }
 
         return redirect()

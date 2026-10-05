@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Notificacion;
 use Aws\Middleware;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use ReflectionMethod;
 
@@ -25,6 +27,31 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
         $this->configurarR2();
+        $this->compartirNotificaciones();
+    }
+
+    // Esta función deja las notificaciones en la barra del panel
+    // En terminos tecnicos, se ejecuta al arrancar la aplicación y, cuando se dibuja partials.navbar,
+    // crea el recordatorio si falta media hora y pasa las no leídas a la vista
+    private function compartirNotificaciones(): void
+    {
+        View::composer('partials.navbar', function ($view) {
+            $usuario = auth()->user();
+
+            if (! $usuario) {
+                $view->with('notificaciones', collect());
+
+                return;
+            }
+
+            Notificacion::recordatorios($usuario);
+
+            $view->with('notificaciones', Notificacion::query()
+                ->where('usuarios_id', $usuario->id)
+                ->where('leida', false)
+                ->latest()
+                ->get());
+        });
     }
 
     // Esta función deja el disco s3 usable con Cloudflare R2

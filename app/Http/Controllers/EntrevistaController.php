@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Entrevista;
 use App\Models\Etapa;
+use App\Models\Notificacion;
 use App\Models\Postulacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -11,11 +12,12 @@ use Illuminate\Support\Facades\DB;
 
 class EntrevistaController extends Controller
 {
-    // Esta función pide una entrevista para una postulación
+    // Esta función crea una solicitud de entrevista para una postulación
     // En terminos tecnicos, cuando el reclutador envía Solicitar entrevista, se ejecuta esta función
     // y crea la fila solicitada y pasa la etapa a En entrevista
     public function store(Request $request, Postulacion $postulacion)
     {
+        // obtiene el usuario logueado y la relación con el modelo PersonalRrhh ya que ahi se encuentran los datos del reclutador
         $reclutador = $request->user()->personalRrhh;
 
         if ($reclutador->disponibilidades()->doesntExist()) {
@@ -49,6 +51,10 @@ class EntrevistaController extends Controller
         if (! $creada) {
             return back()->with('error', 'Esta postulación ya tiene una entrevista en curso.');
         }
+
+        // cada vez que se envia la solicitud de entrevista, se envia una notificación al candidato con el nombre del puesto
+        $nombrePuesto = $postulacion->oferta->busqueda->nombre_puesto;
+        Notificacion::avisar($candidato->usuarios_id, 'Tenés una solicitud de entrevista para '.$nombrePuesto.'.');
 
         return back()->with('ok', 'Enviaste la solicitud de entrevista.');
     }
@@ -206,6 +212,22 @@ class EntrevistaController extends Controller
             return back()->with('error', 'Ese horario ya no está disponible. Elegí otro.');
         }
 
+        $entrevista = $postulacion->entrevistas()
+            ->where('estado', Entrevista::CONFIRMADA)
+            ->where('candidatos_id', $candidato->id)
+            ->latest('id')
+            ->first();
+
+        $entrevista->load(['personalRrhh', 'postulacion.oferta.busqueda']);
+        $nombre = trim($candidato->nombre.' '.$candidato->apellido);
+        $puesto = $entrevista->postulacion->oferta->busqueda->nombre_puesto;
+        $cuando = $entrevista->inicioLocal()->format('d/m/Y H:i');
+
+        Notificacion::avisar(
+            $entrevista->personalRrhh->usuarios_id,
+            $nombre.' confirmó la entrevista de '.$puesto.' para el '.$cuando.'.'
+        );
+
         return redirect()
             ->route('calendario')
             ->with('ok', 'Quedó agendada la entrevista.');
@@ -225,12 +247,14 @@ class EntrevistaController extends Controller
 
         $motivo = trim((string) $request->input('motivo'));
 
-        $cancelada = DB::transaction(function () use ($entrevista, $esCandidato, $motivo) {
+        $aviso = DB::transaction(function () use ($entrevista, $esCandidato, $motivo) {
             $entrevista = Entrevista::query()->whereKey($entrevista->id)->lockForUpdate()->first();
 
             if (! $entrevista || ! $entrevista->estaActiva()) {
-                return false;
+                return null;
             }
+
+            $estado = $entrevista->estado;
 
             $entrevista->update([
                 'estado' => Entrevista::CANCELADA,
@@ -240,11 +264,31 @@ class EntrevistaController extends Controller
 
             $entrevista->postulacion()->update(['etapas_id' => Etapa::ENTREVISTA_CANCELADA]);
 
-            return true;
+            return [$estado, $entrevista];
         });
 
-        if (! $cancelada) {
+        if (! $aviso) {
             return back()->with('error', 'Esta entrevista ya estaba cancelada.');
+        }
+
+        [$estado, $entrevista] = $aviso;
+        $entrevista->load(['postulacion.oferta.busqueda', 'candidato', 'personalRrhh']);
+        $puesto = $entrevista->postulacion->oferta->busqueda->nombre_puesto;
+
+        if ($esCandidato) {
+            $nombre = trim($entrevista->candidato->nombre.' '.$entrevista->candidato->apellido);
+
+            Notificacion::avisar(
+                $entrevista->personalRrhh->usuarios_id,
+                $nombre.' canceló la entrevista de '.$puesto.'.'
+            );
+        } elseif ($estado === Entrevista::CONFIRMADA) {
+            $cuando = $entrevista->inicioLocal()->format('d/m/Y H:i');
+
+            Notificacion::avisar(
+                $entrevista->candidato->usuarios_id,
+                'Se canceló tu entrevista de '.$puesto.' del '.$cuando.'.'
+            );
         }
 
         return back()->with('ok', 'Cancelaste la entrevista.');

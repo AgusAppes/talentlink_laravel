@@ -5,6 +5,7 @@ use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\CandidatoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntrevistaController;
+use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PostulacionController;
@@ -29,6 +30,9 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::post('/notificaciones/leer', [NotificacionController::class, 'leer'])->name('notificaciones.leer');
 
     Route::get('/cambiar-password', [PerfilController::class, 'editPassword'])->name('password.edit');
     Route::put('/cambiar-password', [PerfilController::class, 'updatePassword'])->name('password.update');

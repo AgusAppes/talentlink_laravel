@@ -6,6 +6,7 @@ use App\Experto\EvaluadorCompatibilidad;
 use App\Models\Busqueda;
 use App\Models\Entrevista;
 use App\Models\Etapa;
+use App\Models\Notificacion;
 use App\Models\Oferta;
 use App\Models\Postulacion;
 use Illuminate\Http\Request;
@@ -154,9 +155,23 @@ class PostulacionController extends Controller
     // y actualiza etapas_id
     public function cambiarEtapa(Request $request, Postulacion $postulacion)
     {
+        $etapaAnterior = (int) $postulacion->etapas_id;
+
         $postulacion->update([
             'etapas_id' => $request->input('etapas_id'),
         ]);
+
+        if ((int) $postulacion->etapas_id !== $etapaAnterior) {
+            $postulacion->load(['etapa', 'oferta.busqueda']);
+            $candidato = $postulacion->candidatos()->first();
+
+            if ($candidato && $postulacion->etapa) {
+                Notificacion::avisar(
+                    $candidato->usuarios_id,
+                    'Tu postulación a '.$postulacion->oferta->busqueda->nombre_puesto.' pasó a '.$postulacion->etapa->nombre.'.'
+                );
+            }
+        }
 
         return back()->with('ok', 'Etapa actualizada.');
     }
