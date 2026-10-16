@@ -82,6 +82,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permiso:postulaciones.ver')
         ->name('postulaciones.index');
 
+    Route::get('/postulaciones/{postulacion}', [PostulacionController::class, 'show'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.show');
+
+    Route::get('/postulaciones/{postulacion}/editar', [PostulacionController::class, 'edit'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.edit');
+
     Route::get('/postulaciones/{id}/cv', [PostulacionController::class, 'cv'])
         ->middleware('permiso:postulaciones.gestionar')
         ->name('postulaciones.cv');

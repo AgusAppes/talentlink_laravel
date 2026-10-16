@@ -124,6 +124,18 @@ class CalendarioController extends Controller
         $nota = $nota === '' ? 'No disponible' : $nota;
         $tipo = $request->input('tipo');
 
+        $ahora = Carbon::now(self::ZONA);
+        $fecha = Carbon::createFromFormat('Y-m-d', (string) $request->input('fecha'), self::ZONA)->startOfDay();
+        $pasado = $inicio === null
+            ? $fecha->lt($ahora->copy()->startOfDay())
+            : $this->combinar($fecha, $inicio)->lte($ahora);
+
+        if ($pasado) {
+            return redirect()
+                ->route('calendario', $this->volver($request))
+                ->with('error', 'No podés modificar horarios que ya pasaron.');
+        }
+
         // Si el inicio es null, significa que el reclutador marcó el dia entero como no disponible
         // Se borra todo lo anterior y se crea una fila de bloqueos con el tipo elegido
         if ($inicio === null) {
@@ -161,6 +173,12 @@ class CalendarioController extends Controller
     {
         $reclutador = $this->reclutador($request);
         abort_unless((int) $bloqueo->personal_rrhh_id === (int) $reclutador->id, 403);
+
+        if ($bloqueo->yaPaso()) {
+            return redirect()
+                ->route('calendario', $this->volver($request))
+                ->with('error', 'No podés modificar horarios que ya pasaron.');
+        }
 
         $bloqueo->delete();
 
@@ -301,6 +319,7 @@ class CalendarioController extends Controller
         }
 
         $celdas = [];
+        $ahora = Carbon::now(self::ZONA);
 
         // recorre los dias de la semana
         foreach ($dias as $dia) {
@@ -312,6 +331,7 @@ class CalendarioController extends Controller
                 // slotEnFranja verifica si la fila de media hora está en la franja de disponibilidad
                 $celdas[$dia->toDateString()][$slot] = [
                     'disponible' => $this->slotEnFranja($franjas, $this->minutos($slot)),
+                    'pasado' => $this->combinar($dia, $slot)->lte($ahora),
                 ];
             }
         } 

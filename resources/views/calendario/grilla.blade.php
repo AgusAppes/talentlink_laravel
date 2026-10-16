@@ -75,7 +75,9 @@
                                                     <span class="d-block">{{ $entrevista->textoCancelacion() }}</span>
                                                 @else
                                                     @include('entrevistas.enlace', ['entrevista' => $entrevista])
-                                                    @include('entrevistas.cancelar', ['entrevista' => $entrevista])
+                                                    @unless ($entrevista->yaEmpezo())
+                                                        @include('entrevistas.cancelar', ['entrevista' => $entrevista])
+                                                    @endunless
                                                 @endif
                                             </div>
                                         @else
@@ -88,15 +90,17 @@
                                                 @if (! $bloqueo->esDiaEntero())
                                                     <span class="d-block">{{ substr($bloqueo->hora_inicio, 0, 5) }}–{{ substr($bloqueo->hora_fin, 0, 5) }}</span>
                                                 @endif
-                                                <form method="POST" action="{{ route('calendario.bloqueos.destroy', $bloqueo) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <input type="hidden" name="fecha_actual" value="{{ $fechaActual->toDateString() }}">
-                                                    <button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Quitar</button>
-                                                </form>
+                                                @unless ($bloqueo->yaPaso())
+                                                    <form method="POST" action="{{ route('calendario.bloqueos.destroy', $bloqueo) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <input type="hidden" name="fecha_actual" value="{{ $fechaActual->toDateString() }}">
+                                                        <button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Quitar</button>
+                                                    </form>
+                                                @endunless
                                             </div>
                                         @endif
-                                    @else
+                                    @elseif (! $celda['pasado'])
                                         <button class="btn w-100 h-100 rounded-0 border-0 p-0" type="button" data-bs-toggle="modal" data-bs-target="#accionCalendario" data-fecha="{{ $fecha }}" data-hora="{{ $slot }}" data-fin="{{ $finSlot }}" data-cuando="{{ $cuando }}" aria-label="{{ $cuando }}"></button>
                                     @endif
                                 </td>

@@ -44,8 +44,6 @@ class PostulacionController extends Controller
             return view('postulaciones.mis', compact('postulaciones'));
         }
 
-        $reclutador = $usuario->personalRrhh;
-
         return view('postulaciones.index', [
             'postulaciones' => Postulacion::query()
                 ->with([
@@ -60,6 +58,45 @@ class PostulacionController extends Controller
                 ->orderByDesc('id')
                 ->paginate(10)
                 ->withQueryString(),
+        ]);
+    }
+
+    // Esta función muestra el detalle de una postulación
+    // En terminos tecnicos, cuando se visita /postulaciones/{postulacion}, se ejecuta esta función
+    // y sirve el archivo postulaciones.show.blade.php
+    public function show(Postulacion $postulacion)
+    {
+        $postulacion->load([
+            'candidatos',
+            'etapa',
+            'oferta.estado',
+            'oferta.busqueda.empresa',
+            'entrevistas' => function ($consulta) {
+                $consulta->whereIn('estado', [Entrevista::SOLICITADA, Entrevista::CONFIRMADA]);
+            },
+        ]);
+
+        return view('postulaciones.show', compact('postulacion'));
+    }
+
+    // Esta función muestra el formulario para gestionar una postulación
+    // En terminos tecnicos, cuando se visita /postulaciones/{postulacion}/editar, se ejecuta esta función
+    // y sirve postulaciones.edit.blade.php con las etapas y si el reclutador tiene horarios
+    public function edit(Postulacion $postulacion)
+    {
+        $postulacion->load([
+            'candidatos',
+            'etapa',
+            'oferta.busqueda.empresa',
+            'entrevistas' => function ($consulta) {
+                $consulta->whereIn('estado', [Entrevista::SOLICITADA, Entrevista::CONFIRMADA]);
+            },
+        ]);
+
+        $reclutador = auth()->user()->personalRrhh;
+
+        return view('postulaciones.edit', [
+            'postulacion' => $postulacion,
             'etapas' => Etapa::query()->orderBy('id')->get(),
             'tieneHorario' => $reclutador !== null && $reclutador->disponibilidades()->exists(),
         ]);

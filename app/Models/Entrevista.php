@@ -88,6 +88,16 @@ class Entrevista extends Model
         return $inicio->copy()->addMinutes($this->duracion_minutos);
     }
 
+    // Esta función dice si la entrevista ya empezó
+    // En terminos tecnicos, cuando el calendario decide si muestra Cancelar, se ejecuta esta función
+    // y compara el inicio local con la hora actual de Argentina
+    public function yaEmpezo(): bool
+    {
+        $inicio = $this->inicioLocal();
+
+        return $inicio !== null && $inicio->lte(Carbon::now(CalendarioController::ZONA));
+    }
+
     // Esta función arma el título que ve el reclutador
     // En terminos tecnicos, cuando se pinta un turno en su calendario, se ejecuta esta función
     // y junta el nombre del candidato con el puesto de la oferta

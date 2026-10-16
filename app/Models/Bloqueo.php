@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\CalendarioController;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Bloqueo extends Model
 {
@@ -29,5 +31,17 @@ class Bloqueo extends Model
     public function esDiaEntero(): bool
     {
         return $this->hora_inicio === null || $this->hora_fin === null;
+    }
+
+    // Esta función dice si el bloqueo ya terminó
+    // En terminos tecnicos, cuando el calendario decide si muestra Quitar, se ejecuta esta función
+    // y compara el fin del bloqueo con la hora actual de Argentina
+    public function yaPaso(): bool
+    {
+        $fin = $this->esDiaEntero()
+            ? Carbon::createFromFormat('Y-m-d', $this->fecha->format('Y-m-d'), CalendarioController::ZONA)->startOfDay()->addDay()
+            : Carbon::createFromFormat('Y-m-d H:i', $this->fecha->format('Y-m-d').' '.substr($this->hora_fin, 0, 5), CalendarioController::ZONA);
+
+        return $fin->lte(Carbon::now(CalendarioController::ZONA));
     }
 }

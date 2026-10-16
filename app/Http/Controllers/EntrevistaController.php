@@ -247,6 +247,10 @@ class EntrevistaController extends Controller
 
         abort_unless($esCandidato || $esReclutador, 403);
 
+        if ($entrevista->yaEmpezo()) {
+            return back()->with('error', 'No podés cancelar una entrevista que ya empezó.');
+        }
+
         $motivo = trim((string) $request->input('motivo'));
 
         $aviso = DB::transaction(function () use ($entrevista, $esCandidato, $motivo) {

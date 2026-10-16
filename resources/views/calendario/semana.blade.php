@@ -49,7 +49,9 @@
                                                 <span class="d-block">{{ $entrevista->textoCancelacion() }}</span>
                                             @else
                                                 @include('entrevistas.enlace', ['entrevista' => $entrevista])
-                                                @include('entrevistas.cancelar', ['entrevista' => $entrevista])
+                                                @unless ($entrevista->yaEmpezo())
+                                                    @include('entrevistas.cancelar', ['entrevista' => $entrevista])
+                                                @endunless
                                             @endif
                                         </div>
                                     @endforeach
