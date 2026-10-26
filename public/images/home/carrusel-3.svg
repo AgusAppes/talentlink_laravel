@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Ilustración de muestra: calendario de entrevistas">
+  <rect width="1200" height="720" fill="#f4f6fb"/>
+  <rect x="160" y="90" width="880" height="540" rx="32" fill="#fff" stroke="#e5e7eb"/>
+  <rect x="160" y="90" width="880" height="88" rx="32" fill="#1f3c88"/>
+  <rect x="160" y="146" width="880" height="32" fill="#1f3c88"/>
+  <text x="600" y="146" text-anchor="middle" fill="#fff" font-family="Segoe UI, sans-serif" font-size="28" font-weight="650">Agenda de entrevistas</text>
+  <g fill="#e8eef8">
+    <rect x="210" y="230" width="140" height="90" rx="14"/>
+    <rect x="370" y="230" width="140" height="90" rx="14"/>
+    <rect x="530" y="230" width="140" height="90" rx="14" fill="#dbeafe"/>
+    <rect x="690" y="230" width="140" height="90" rx="14"/>
+    <rect x="850" y="230" width="140" height="90" rx="14"/>
+    <rect x="210" y="340" width="140" height="90" rx="14"/>
+    <rect x="370" y="340" width="140" height="90" rx="14" fill="#1f3c88"/>
+    <rect x="530" y="340" width="140" height="90" rx="14"/>
+    <rect x="690" y="340" width="140" height="90" rx="14"/>
+    <rect x="850" y="340" width="140" height="90" rx="14"/>
+    <rect x="210" y="450" width="140" height="90" rx="14"/>
+    <rect x="370" y="450" width="140" height="90" rx="14"/>
+    <rect x="530" y="450" width="140" height="90" rx="14"/>
+    <rect x="690" y="450" width="140" height="90" rx="14" fill="#dbeafe"/>
+    <rect x="850" y="450" width="140" height="90" rx="14"/>
+  </g>
+  <text x="600" y="680" text-anchor="middle" fill="#64748b" font-family="Segoe UI, sans-serif" font-size="20">Imagen de muestra</text>
+</svg>

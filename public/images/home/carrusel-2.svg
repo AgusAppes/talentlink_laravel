@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Ilustración de muestra: seguimiento de una postulación">
+  <rect width="1200" height="720" fill="#0b1b3a"/>
+  <circle cx="1040" cy="80" r="160" fill="#3b82f6" opacity=".18"/>
+  <circle cx="120" cy="640" r="120" fill="#1f3c88"/>
+  <g transform="translate(150 150)" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round">
+    <rect x="0" y="40" width="900" height="8" stroke="#3b82f6" opacity=".35"/>
+    <circle cx="40" cy="44" r="28" fill="#3b82f6" stroke="none"/>
+    <circle cx="320" cy="44" r="28" fill="#1f3c88" stroke="#fff"/>
+    <circle cx="600" cy="44" r="28" fill="#0b1b3a" stroke="#fff"/>
+    <circle cx="860" cy="44" r="28" fill="#0b1b3a" stroke="#94a3b8"/>
+  </g>
+  <g font-family="Segoe UI, sans-serif" fill="#fff" text-anchor="middle">
+    <text x="190" y="280" font-size="22">Postulación</text>
+    <text x="470" y="280" font-size="22">Entrevista</text>
+    <text x="750" y="280" font-size="22">Etapa</text>
+    <text x="1010" y="280" font-size="22" fill="#94a3b8">Cierre</text>
+    <text x="600" y="420" font-size="40" font-weight="650">El proceso, en un solo lugar</text>
+    <text x="600" y="470" font-size="22" fill="#cbd5e1">Imagen de muestra. Reemplazala en public/images/home/</text>
+  </g>
+</svg>
