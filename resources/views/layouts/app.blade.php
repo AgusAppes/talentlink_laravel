@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{-- Título de la pestaña. Cada vista define la sección "title". --}}
     <title>@yield('title') — TalentLink</title>
+    @include('partials.iconos')
     @vite(['resources/css/bootstrap.css'])
     <link rel="stylesheet" href="{{ asset('css/tema.css') }}">
     {{-- Tokens y tarjetas que todavía usan las pantallas. --}}

@@ -4,8 +4,8 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#menuLateral" aria-label="Cerrar"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column p-3">
-        <a class="d-block mb-3 p-2 rounded bg-white bg-opacity-10" href="{{ route(auth()->user()->rutaInicio()) }}">
-            <img class="img-fluid rounded" src="{{ asset('images/logo.jpg') }}" alt="TalentLink">
+        <a class="d-inline-block mb-3" href="{{ route(auth()->user()->rutaInicio()) }}">
+            <img src="{{ asset('logo_TL.png') }}" alt="TalentLink" width="72" height="77">
         </a>
 
         <p class="small text-uppercase text-white-50 px-2 mb-1">Principal</p>

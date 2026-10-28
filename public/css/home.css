@@ -27,8 +27,6 @@
     width: auto;
     height: 64px;
     object-fit: contain;
-    background: #fff;
-    border-radius: 0.7rem;
 }
 
 .tl-home-nav .nav-link {

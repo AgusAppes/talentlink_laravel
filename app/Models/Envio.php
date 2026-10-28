@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Controllers\CalendarioController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Envio extends Model
 {
@@ -32,6 +33,14 @@ class Envio extends Model
     public function personalRrhh(): BelongsTo
     {
         return $this->belongsTo(PersonalRrhh::class, 'personal_rrhh_id');
+    }
+
+    // Esta función trae la entrevista que propuso la empresa
+    // En terminos tecnicos, cuando la ficha del candidato recibido muestra el horario, se ejecuta esta función
+    // y busca la fila de entrevistas_empresa con este envios_id
+    public function entrevistaEmpresa(): HasOne
+    {
+        return $this->hasOne(EntrevistaEmpresa::class, 'envios_id');
     }
 
     // Esta función escribe la fecha del envío en hora argentina

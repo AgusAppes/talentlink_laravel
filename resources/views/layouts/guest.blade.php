@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'TalentLink')</title>
+    @include('partials.iconos')
     @vite(['resources/css/bootstrap.css'])
     <link rel="stylesheet" href="{{ asset('css/tema.css') }}">
 </head>
 <body>
     <main class="min-vh-100 d-flex align-items-center justify-content-center p-3">
         <div class="w-100" style="max-width: 28rem;">
-            <img class="d-block mx-auto mb-3 rounded" src="{{ asset('images/logo.jpg') }}" alt="TalentLink" width="96">
+            <img class="d-block mx-auto mb-3" src="{{ asset('logo_TL.png') }}" alt="TalentLink" width="96" height="102">
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('error') }}

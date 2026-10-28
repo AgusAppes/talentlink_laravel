@@ -20,6 +20,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Inicio — TalentLink</title>
+    @include('partials.iconos')
     @vite(['resources/css/bootstrap.css'])
     <link rel="stylesheet" href="{{ asset('css/tema.css') }}">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
@@ -32,7 +33,7 @@
         <nav class="navbar navbar-expand-lg py-3" aria-label="Principal">
             <div class="container">
                 <a class="navbar-brand tl-home-marca d-flex align-items-center p-0" href="{{ route('home') }}">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="TalentLink" height="64">
+                    <img src="{{ asset('logo_TL.png') }}" alt="TalentLink" width="60" height="64">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuHome" aria-controls="menuHome" aria-expanded="false" aria-label="Abrir menú">
                     <span class="navbar-toggler-icon"></span>
@@ -305,7 +306,7 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <a class="d-inline-flex mb-3" href="{{ route('home') }}">
-                        <img src="{{ asset('images/logo.jpg') }}" alt="TalentLink" height="72">
+                        <img src="{{ asset('logo_TL.png') }}" alt="TalentLink" width="68" height="72">
                     </a>
                     <p>Plataforma para organizar ofertas, solicitudes de personal, perfiles de candidatos y el avance de las postulaciones.</p>
                 </div>

@@ -87,7 +87,9 @@
                                     @endif
                                 </td>
                                 @if (auth()->user()->esEmpresa())
-                                    <td>{{ $busqueda->candidatos_recibidos }}</td>
+                                    <td>
+                                        <a href="{{ route('solicitudes.candidatos', $busqueda) }}">{{ $busqueda->candidatos_recibidos }}</a>
+                                    </td>
                                 @endif
                                 @if (auth()->user()->esAdmin())
                                     <td>

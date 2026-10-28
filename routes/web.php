@@ -56,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permiso:solicitudes.crear')->group(function () {
         Route::get('/solicitudes/nueva', [SolicitudController::class, 'create'])->name('solicitudes.create');
         Route::post('/solicitudes', [SolicitudController::class, 'store'])->name('solicitudes.store');
+        Route::get('/solicitudes/{busqueda}/candidatos', [SolicitudController::class, 'candidatos'])->name('solicitudes.candidatos');
+        Route::get('/solicitudes/{busqueda}/candidatos/{candidato}', [SolicitudController::class, 'perfil'])->name('solicitudes.perfil');
+        Route::post('/envios/{envio}/entrevista', [SolicitudController::class, 'solicitarEntrevista'])->name('envios.entrevista');
     });
 
     Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])
