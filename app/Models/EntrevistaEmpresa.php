@@ -15,6 +15,7 @@ class EntrevistaEmpresa extends Model
         'envios_id',
         'inicio',
         'nota',
+        'enlace',
     ];
 
     protected $casts = [
@@ -35,5 +36,38 @@ class EntrevistaEmpresa extends Model
     public function inicioLocal(): ?Carbon
     {
         return $this->inicio?->copy()->timezone(CalendarioController::ZONA);
+    }
+
+    // Esta función dice si la entrevista ya empezó
+    // En terminos tecnicos, cuando el calendario decide si muestra Confirmar, se ejecuta esta función
+    // y compara el inicio local con la hora actual de Argentina
+    public function yaEmpezo(): bool
+    {
+        $inicio = $this->inicioLocal();
+
+        return $inicio !== null && $inicio->lte(Carbon::now(CalendarioController::ZONA));
+    }
+
+    // Esta función arma el título que ve el candidato
+    // En terminos tecnicos, cuando se pinta el turno en su calendario, se ejecuta esta función
+    // y junta la empresa con el puesto de la oferta
+    public function tituloCandidato(): string
+    {
+        $empresa = $this->envio?->postulacion?->oferta?->busqueda?->empresa?->nombre ?? '';
+        $puesto = $this->envio?->postulacion?->oferta?->busqueda?->nombre_puesto ?? '';
+
+        return 'entrevista con '.$empresa.'-'.$puesto;
+    }
+
+    // Esta función arma el título que ve la empresa
+    // En terminos tecnicos, cuando se pinta el turno en su calendario, se ejecuta esta función
+    // y junta el nombre del candidato con el puesto de la oferta
+    public function tituloEmpresa(): string
+    {
+        $candidato = $this->envio?->postulacion?->candidatos?->first();
+        $nombre = trim(($candidato?->nombre ?? '').' '.($candidato?->apellido ?? ''));
+        $puesto = $this->envio?->postulacion?->oferta?->busqueda?->nombre_puesto ?? '';
+
+        return 'entrevista con '.$nombre.'-'.$puesto;
     }
 }

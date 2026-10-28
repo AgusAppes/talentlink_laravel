@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bloqueo;
 use App\Models\Entrevista;
+use App\Models\EntrevistaEmpresa;
 use App\Models\PersonalRrhh;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -29,11 +30,25 @@ class CalendarioController extends Controller
 
     // Esta función muestra el calendario según el rol a partir de la fecha actual
     // En terminos tecnicos, cuando se visita /calendario, se ejecuta esta función
-    // y sirve la semana del reclutador o del candidato
+    // y sirve la semana del reclutador, del candidato o de la empresa
     public function index(Request $request)
     {
         $usuario = $request->user();
         $fechaActual = $this->fechaActual($request);
+
+        if ($usuario->esEmpresa()) {
+            $empresa = $usuario->empresa;
+            abort_unless($empresa, 403);
+
+            return view('calendario.index', array_merge(
+                $this->armarSemanaEmpresa($fechaActual, (int) $empresa->id),
+                [
+                    'fechaActual' => $fechaActual,
+                    'hoy' => Carbon::now(self::ZONA)->toDateString(),
+                    'editar' => false,
+                ]
+            ));
+        }
 
         if ($usuario->esCandidato()) {
             $candidato = $usuario->candidato;
@@ -251,6 +266,9 @@ class CalendarioController extends Controller
             $disponibles = $reclutador->disponibilidades()->get()->groupBy('dia_semana');
             $grilla = $this->grilla($dias, $entrevistas, $bloqueos, $disponibles);
         } else {
+            $entrevistas = $entrevistas->concat(
+                $this->entrevistasEmpresaEntre($inicio, $fin, $candidatoId)
+            );
             [$grilla['slots'], $entrevistasPorSlot] = $this->slotsCandidato($entrevistas);
         }
 
@@ -273,6 +291,8 @@ class CalendarioController extends Controller
         $minutoMin = null;
         $minutoMax = null;
 
+        $exactos = [];
+
         foreach ($entrevistas as $entrevista) {
             $local = $entrevista->inicioLocal();
 
@@ -283,6 +303,7 @@ class CalendarioController extends Controller
             $minuto = ($local->hour * 60) + $local->minute;
             $slot = sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60);
             $porSlot[$local->toDateString()][$slot][] = $entrevista;
+            $exactos[$slot] = $minuto;
             $minutoMin = min($minutoMin ?? $minuto, $minuto);
             $minutoMax = max($minutoMax ?? $minuto, $minuto);
         }
@@ -291,8 +312,15 @@ class CalendarioController extends Controller
 
         if ($minutoMin !== null) {
             for ($minuto = $minutoMin; $minuto <= $minutoMax; $minuto += self::DURACION) {
-                $slots[] = sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60);
+                $slots[sprintf('%02d:%02d', intdiv($minuto, 60), $minuto % 60)] = $minuto;
             }
+
+            foreach ($exactos as $slot => $minuto) {
+                $slots[$slot] = $minuto;
+            }
+
+            asort($slots);
+            $slots = array_keys($slots);
         }
 
         return [$slots, $porSlot];
@@ -471,6 +499,76 @@ class CalendarioController extends Controller
 
             return $inicio && $inicio >= $desde && $inicio < $hasta;
         })->values();
+    }
+
+    // Esta función trae las entrevistas que la empresa propuso al candidato
+    // En terminos tecnicos, cuando el candidato arma su semana, se ejecuta esta función
+    // y deja las de entrevistas_empresa que caen en ese período
+    private function entrevistasEmpresaEntre(Carbon $desde, Carbon $hasta, int $candidatoId): Collection
+    {
+        return EntrevistaEmpresa::query()
+            ->with(['envio.postulacion.oferta.busqueda.empresa'])
+            ->whereHas('envio.postulacion.candidatos', function ($candidatos) use ($candidatoId) {
+                $candidatos->where('candidatos.id', $candidatoId);
+            })
+            ->where('inicio', '>=', $desde->copy()->subDay()->utc())
+            ->where('inicio', '<', $hasta->copy()->addDay()->utc())
+            ->get()
+            ->filter(function (EntrevistaEmpresa $entrevista) use ($desde, $hasta) {
+                $inicio = $entrevista->inicioLocal();
+
+                return $inicio && $inicio >= $desde && $inicio < $hasta;
+            })
+            ->values();
+    }
+
+    // Esta función arma la semana de reuniones de una empresa
+    // En terminos tecnicos, cuando la empresa abre /calendario, se ejecuta esta función
+    // y deja las entrevistas futuras de sus búsquedas, ubicadas por día y hora
+    private function armarSemanaEmpresa(Carbon $fechaActual, int $empresaId): array
+    {
+        $inicio = $fechaActual->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
+        $fin = $inicio->copy()->addDays(7);
+        $dias = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $dias[] = $inicio->copy()->addDays($i);
+        }
+
+        $desde = $inicio->gt(Carbon::now(self::ZONA)) ? $inicio : Carbon::now(self::ZONA);
+        [$slots, $entrevistasPorSlot] = $this->slotsCandidato(
+            $this->entrevistasDeLaEmpresa($desde, $fin, $empresaId)
+        );
+
+        return [
+            'inicioSemana' => $inicio,
+            'dias' => $dias,
+            'slots' => $slots,
+            'entrevistasPorSlot' => $entrevistasPorSlot,
+            'celdas' => [],
+            'cubiertos' => [],
+        ];
+    }
+
+    // Esta función trae las reuniones futuras de una empresa
+    // En terminos tecnicos, cuando se arma su calendario, se ejecuta esta función
+    // y filtra entrevistas_empresa de sus búsquedas que todavía no empezaron
+    private function entrevistasDeLaEmpresa(Carbon $desde, Carbon $hasta, int $empresaId): Collection
+    {
+        return EntrevistaEmpresa::query()
+            ->with(['envio.postulacion.candidatos', 'envio.postulacion.oferta.busqueda'])
+            ->whereHas('envio.postulacion.oferta.busqueda', function ($busqueda) use ($empresaId) {
+                $busqueda->where('empresas_id', $empresaId);
+            })
+            ->where('inicio', '>=', $desde->copy()->utc())
+            ->where('inicio', '<', $hasta->copy()->utc())
+            ->get()
+            ->filter(function (EntrevistaEmpresa $entrevista) use ($desde, $hasta) {
+                $inicio = $entrevista->inicioLocal();
+
+                return $inicio && $inicio >= $desde && $inicio < $hasta;
+            })
+            ->values();
     }
 
     // Esta función prepara la franja de cada día para el formulario

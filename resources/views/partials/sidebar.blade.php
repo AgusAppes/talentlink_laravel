@@ -1,14 +1,14 @@
 <aside class="offcanvas-lg offcanvas-start tl-sidebar flex-shrink-0" tabindex="-1" id="menuLateral" aria-label="Menú principal">
     <div class="offcanvas-header">
         <span class="offcanvas-title">Menú</span>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#menuLateral" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#menuLateral" aria-label="Cerrar"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column p-3">
         <a class="d-inline-block mb-3" href="{{ route(auth()->user()->rutaInicio()) }}">
             <img src="{{ asset('logo_TL.png') }}" alt="TalentLink" width="72" height="77">
         </a>
 
-        <p class="small text-uppercase text-white-50 px-2 mb-1">Principal</p>
+        <p class="small text-uppercase px-2 mb-1">Principal</p>
         <nav class="nav flex-column gap-1">
             @if (auth()->user()->puede('dashboard.ver'))
                 <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
@@ -42,7 +42,7 @@
                 </a>
             @endif
 
-            @if (auth()->user()->puede('postulaciones.gestionar') || (auth()->user()->esCandidato() && auth()->user()->puede('postulaciones.ver')))
+            @if (auth()->user()->puede('postulaciones.gestionar') || (auth()->user()->esEmpresa() && auth()->user()->puede('solicitudes.crear')) || (auth()->user()->esCandidato() && auth()->user()->puede('postulaciones.ver')))
                 <a href="{{ route('calendario') }}" class="nav-link {{ request()->routeIs('calendario') ? 'active' : '' }}">Calendario</a>
             @endif
 
@@ -60,7 +60,7 @@
         </nav>
 
         @if (auth()->user()->puede('usuarios.ver'))
-            <p class="small text-uppercase text-white-50 px-2 mt-3 mb-1">Reportes</p>
+            <p class="small text-uppercase px-2 mt-3 mb-1">Reportes</p>
             <nav class="nav flex-column gap-1">
                 <a href="{{ route('usuarios.index') }}" class="nav-link {{ request()->routeIs('usuarios.index', 'usuarios.create') ? 'active' : '' }}">Usuarios</a>
                 <a class="nav-link ps-4 {{ request()->routeIs('usuarios.roles', 'usuarios.roles.edit') ? 'active' : '' }}" href="{{ route('usuarios.roles') }}">Roles y permisos</a>

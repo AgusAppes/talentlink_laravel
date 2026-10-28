@@ -75,7 +75,11 @@
                 @endif
 
                 @if ($envio->entrevistaEmpresa)
-                    <p class="small text-secondary mb-0 mt-3">Entrevista propuesta para el {{ $envio->entrevistaEmpresa->inicioLocal()->format('d/m/Y H:i') }}.</p>
+                    <p class="small text-secondary mb-0 mt-3">
+                        {{ $envio->entrevistaEmpresa->enlace ? 'Entrevista confirmada' : 'Entrevista propuesta' }}
+                        para el {{ $envio->entrevistaEmpresa->inicioLocal()->format('d/m/Y H:i') }}.
+                    </p>
+                    @include('entrevistas.enlace', ['entrevista' => $envio->entrevistaEmpresa])
                 @endif
             </div>
         </article>

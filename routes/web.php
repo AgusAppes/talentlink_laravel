@@ -61,6 +61,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/envios/{envio}/entrevista', [SolicitudController::class, 'solicitarEntrevista'])->name('envios.entrevista');
     });
 
+    Route::post('/envios/{envio}/entrevista/confirmar', [SolicitudController::class, 'confirmarEntrevista'])
+        ->middleware('permiso:postulaciones.crear')
+        ->name('envios.entrevista.confirmar');
+
     Route::patch('/solicitudes/{busqueda}/estado', [SolicitudController::class, 'cambiarEstado'])
         ->middleware('permiso:solicitudes.editar')
         ->name('solicitudes.estado');
@@ -118,7 +122,7 @@ Route::middleware('auth')->group(function () {
         ->name('perfil.horario.update');
 
     Route::get('/calendario', [CalendarioController::class, 'index'])
-        ->middleware('permiso:postulaciones.ver|postulaciones.gestionar')
+        ->middleware('permiso:postulaciones.ver|postulaciones.gestionar|solicitudes.crear')
         ->name('calendario');
 
     Route::post('/calendario/bloqueos', [CalendarioController::class, 'guardarBloqueo'])

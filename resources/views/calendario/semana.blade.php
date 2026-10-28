@@ -11,12 +11,17 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2 mb-3">
-            <span class="badge rounded-pill bg-primary-subtle text-dark">Entrevista</span>
-            <span class="badge rounded-pill bg-secondary-subtle text-dark">Cancelada</span>
+            @if (auth()->user()->esEmpresa())
+                <span class="badge rounded-pill bg-info-subtle text-dark">Reunión</span>
+            @else
+                <span class="badge rounded-pill bg-primary-subtle text-dark">Entrevista con la consultora</span>
+                <span class="badge rounded-pill bg-info-subtle text-dark">Entrevista con la empresa</span>
+                <span class="badge rounded-pill bg-secondary-subtle text-dark">Cancelada</span>
+            @endif
         </div>
 
         @if ($slots === [])
-            <p class="text-secondary mb-0">No hay entrevistas en esta semana.</p>
+            <p class="text-secondary mb-0">{{ auth()->user()->esEmpresa() ? 'No hay reuniones agendadas en esta semana.' : 'No hay entrevistas en esta semana.' }}</p>
         @else
         <div class="table-responsive">
             <table class="table table-bordered align-top mb-0 small">
@@ -42,6 +47,23 @@
                                 @endphp
                                 <td class="{{ $clave === $hoy ? 'tl-hoy'.($loop->parent->last ? ' tl-hoy-fin' : '') : '' }}">
                                     @foreach ($turnos as $entrevista)
+                                        @if ($entrevista instanceof \App\Models\EntrevistaEmpresa)
+                                            <div class="rounded p-1 mb-1 bg-info-subtle">
+                                                <span class="d-block fw-semibold">{{ auth()->user()->esEmpresa() ? $entrevista->tituloEmpresa() : $entrevista->tituloCandidato() }}</span>
+                                                <span class="d-block">{{ $entrevista->inicioLocal()->format('H:i') }}</span>
+                                                @if ($entrevista->nota)
+                                                    <span class="d-block">{{ $entrevista->nota }}</span>
+                                                @endif
+                                                @if ($entrevista->enlace)
+                                                    @include('entrevistas.enlace', ['entrevista' => $entrevista])
+                                                @elseif (auth()->user()->esCandidato() && ! $entrevista->yaEmpezo())
+                                                    <form method="POST" action="{{ route('envios.entrevista.confirmar', $entrevista->envio) }}">
+                                                        @csrf
+                                                        <button class="btn btn-sm btn-primary mt-1" type="submit">Confirmar</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        @else
                                         <div class="rounded p-1 mb-1 {{ $entrevista->estado === 'cancelada' ? 'bg-secondary-subtle' : 'bg-primary-subtle' }}">
                                             <span class="d-block fw-semibold">{{ $entrevista->tituloCandidato() }}</span>
                                             <span class="d-block">{{ $entrevista->inicioLocal()->format('H:i') }} · {{ $entrevista->duracion_minutos }} min</span>
@@ -54,6 +76,7 @@
                                                 @endunless
                                             @endif
                                         </div>
+                                        @endif
                                     @endforeach
                                 </td>
                             @endforeach

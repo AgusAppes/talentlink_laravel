@@ -14,6 +14,7 @@ use App\Models\Provincia;
 use App\Models\SolicitudDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class SolicitudController extends Controller
@@ -205,6 +206,7 @@ class SolicitudController extends Controller
             [
                 'inicio' => $inicio->copy()->utc(),
                 'nota' => $nota,
+                'enlace' => null,
             ]
         );
 
@@ -221,6 +223,45 @@ class SolicitudController extends Controller
         }
 
         return back()->with('ok', 'Enviaste la solicitud de entrevista al candidato.');
+    }
+
+    // Esta función confirma la entrevista con la empresa y arma el link de la reunión
+    // En terminos tecnicos, cuando el candidato envía Confirmar en su calendario, se ejecuta esta función
+    // y guarda el enlace de Jitsi si el turno todavía no empezó
+    public function confirmarEntrevista(Request $request, Envio $envio)
+    {
+        $candidato = $request->user()->candidato;
+        abort_unless($candidato, 403);
+
+        $envio->load('postulacion.candidatos', 'postulacion.oferta.busqueda.empresa', 'entrevistaEmpresa');
+        abort_unless($envio->postulacion->candidatos->contains('id', $candidato->id), 403);
+
+        $entrevista = $envio->entrevistaEmpresa;
+
+        if (! $entrevista) {
+            return back()->with('error', 'No hay una entrevista propuesta.');
+        }
+
+        if ($entrevista->enlace) {
+            return back()->with('ok', 'Esta entrevista ya está confirmada.');
+        }
+
+        if ($entrevista->yaEmpezo()) {
+            return back()->with('error', 'Esa entrevista ya empezó.');
+        }
+
+        $enlace = 'https://meet.jit.si/TalentLink-'.Str::lower(Str::random(20));
+        $entrevista->update(['enlace' => $enlace]);
+
+        $busqueda = $envio->postulacion->oferta->busqueda;
+        $cuando = $entrevista->inicioLocal()->format('d/m/Y H:i');
+
+        Notificacion::avisar(
+            $busqueda->empresa->usuarios_id,
+            $candidato->nombre.' '.$candidato->apellido.' confirmó la entrevista para '.$busqueda->nombre_puesto.' del '.$cuando.'. Podés unirte en '.$enlace
+        );
+
+        return back()->with('ok', 'Confirmaste la entrevista. Ya podés unirte a la reunión.');
     }
 
     // Esta función comprueba que la solicitud sea de la empresa logueada
