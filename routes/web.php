@@ -102,6 +102,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permiso:postulaciones.gestionar')
         ->name('postulaciones.etapa');
 
+    Route::post('/postulaciones/{postulacion}/envio', [PostulacionController::class, 'enviar'])
+        ->middleware('permiso:postulaciones.gestionar')
+        ->name('postulaciones.enviar');
+
     Route::get('/mi-perfil/horario', [CalendarioController::class, 'horario'])
         ->middleware('permiso:postulaciones.gestionar')
         ->name('perfil.horario');

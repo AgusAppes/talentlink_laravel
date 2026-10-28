@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class Postulacion extends Model
@@ -50,6 +51,22 @@ class Postulacion extends Model
     public function entrevistas(): HasMany
     {
         return $this->hasMany(Entrevista::class, 'postulaciones_id');
+    }
+
+    // Esta función trae el envío de esta postulación a la empresa
+    // En terminos tecnicos, cuando se abre Enviar a la empresa o se cuenta la columna, se ejecuta esta función
+    // y busca la fila de envios con este postulaciones_id
+    public function envio(): HasOne
+    {
+        return $this->hasOne(Envio::class, 'postulaciones_id');
+    }
+
+    // Esta función dice si el candidato ya puede enviarse a la empresa
+    // En terminos tecnicos, cuando la edición de la postulación muestra el botón, se ejecuta esta función
+    // y acepta solo la etapa Aprobada o En entrevista
+    public function puedeEnviarse(): bool
+    {
+        return in_array((int) $this->etapas_id, [Etapa::APROBADA, Etapa::EN_ENTREVISTA], true);
     }
 
     // Esta función devuelve la solicitud o entrevista que sigue en curso

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Busqueda extends Model
@@ -79,5 +80,20 @@ class Busqueda extends Model
     public function oferta(): HasOne
     {
         return $this->hasOne(Oferta::class, 'busquedas_id');
+    }
+
+    // Esta función trae las postulaciones de la oferta de esta búsqueda
+    // En terminos tecnicos, cuando la empresa cuenta candidatos recibidos, se ejecuta esta función
+    // y llega a postulaciones pasando por la oferta
+    public function postulaciones(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Postulacion::class,
+            Oferta::class,
+            'busquedas_id',
+            'ofertas_id',
+            'id',
+            'id'
+        );
     }
 }

@@ -85,7 +85,8 @@ class PostulacionController extends Controller
     public function edit(Postulacion $postulacion)
     {
         $postulacion->load([
-            'candidatos',
+            'candidatos.usuario',
+            'envio',
             'etapa',
             'oferta.busqueda.empresa',
             'entrevistas' => function ($consulta) {
@@ -214,6 +215,51 @@ class PostulacionController extends Controller
         }
 
         return back()->with('ok', 'Etapa actualizada.');
+    }
+
+    // Esta función guarda la ficha que la empresa va a recibir
+    // En terminos tecnicos, cuando RRHH envía el modal de la postulación, se ejecuta esta función
+    // y crea o actualiza la fila de envios si la etapa es Aprobada o En entrevista
+    public function enviar(Request $request, Postulacion $postulacion)
+    {
+        $reclutador = $request->user()->personalRrhh;
+
+        if (! $reclutador) {
+            abort(403);
+        }
+
+        if (! $postulacion->puedeEnviarse()) {
+            return back()->with('error', 'Este candidato se puede enviar cuando la etapa es Aprobada o En entrevista.');
+        }
+
+        $datos = $request->validate([
+            'telefono' => ['nullable', 'string', 'max:40'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+            'comentario' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'telefono.max' => 'El teléfono no puede superar los 40 caracteres.',
+            'descripcion.max' => 'La descripción no puede superar los 2000 caracteres.',
+            'comentario.max' => 'El comentario no puede superar los 2000 caracteres.',
+        ]);
+
+        $telefono = trim((string) ($datos['telefono'] ?? ''));
+        $descripcion = trim((string) ($datos['descripcion'] ?? ''));
+        $comentario = trim((string) ($datos['comentario'] ?? ''));
+        $yaEnviado = $postulacion->envio()->exists();
+
+        $postulacion->envio()->updateOrCreate(
+            ['postulaciones_id' => $postulacion->id],
+            [
+                'personal_rrhh_id' => $reclutador->id,
+                'telefono' => $telefono !== '' ? $telefono : null,
+                'descripcion' => $descripcion !== '' ? $descripcion : null,
+                'comentario' => $comentario !== '' ? $comentario : null,
+            ]
+        );
+
+        return back()->with('ok', $yaEnviado
+            ? 'Actualizaste el envío a la empresa.'
+            : 'Enviaste el candidato a la empresa.');
     }
 
     // Esta función vuelve a calcular la compatibilidad de una postulación

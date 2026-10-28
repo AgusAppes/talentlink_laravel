@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Etapa extends Model
 {
+    public const APROBADA = 4;
+
     public const EN_ENTREVISTA = 5;
 
     public const ENTREVISTA_CANCELADA = 6;

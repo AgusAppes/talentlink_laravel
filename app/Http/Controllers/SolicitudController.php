@@ -26,7 +26,10 @@ class SolicitudController extends Controller
             ->orderByDesc('id');
 
         if ($usuario->esEmpresa()) {
-            $consulta->where('empresas_id', $usuario->empresa?->id);
+            $consulta->where('empresas_id', $usuario->empresa?->id)
+                ->withCount(['postulaciones as candidatos_recibidos' => function ($postulaciones) {
+                    $postulaciones->whereHas('envio');
+                }]);
         }
 
         $busquedas = $consulta->paginate(10)->withQueryString();

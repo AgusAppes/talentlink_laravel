@@ -36,6 +36,9 @@
                             <th>Modalidad</th>
                             <th>Ubicación</th>
                             <th>Estado</th>
+                            @if (auth()->user()->esEmpresa())
+                                <th>Candidatos recibidos</th>
+                            @endif
                             @if (auth()->user()->esAdmin())
                                 <th>Oferta</th>
                             @endif
@@ -83,6 +86,9 @@
                                         </form>
                                     @endif
                                 </td>
+                                @if (auth()->user()->esEmpresa())
+                                    <td>{{ $busqueda->candidatos_recibidos }}</td>
+                                @endif
                                 @if (auth()->user()->esAdmin())
                                     <td>
                                         @if ($busqueda->oferta)

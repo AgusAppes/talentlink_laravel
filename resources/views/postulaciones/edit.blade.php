@@ -41,6 +41,29 @@
         </div>
     </section>
 
+    @if (auth()->user()->personalRrhh && $candidato)
+        <section class="card shadow-sm border-0 mt-3">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Envío a la empresa</h2>
+
+                @if ($postulacion->puedeEnviarse())
+                    @if ($postulacion->envio)
+                        <p class="small text-secondary mb-2">Enviado el {{ $postulacion->envio->enviadoEl() }}.</p>
+                    @endif
+                    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#enviarEmpresa">
+                        {{ $postulacion->envio ? 'Revisar envío' : 'Enviar a la empresa' }}
+                    </button>
+                @else
+                    @if ($postulacion->envio)
+                        <p class="small text-secondary mb-0">Enviado el {{ $postulacion->envio->enviadoEl() }}. Para modificar la ficha, la etapa tiene que ser Aprobada o En entrevista.</p>
+                    @else
+                        <p class="text-secondary small mb-0">Vas a poder enviarlo cuando la etapa sea Aprobada o En entrevista.</p>
+                    @endif
+                @endif
+            </div>
+        </section>
+    @endif
+
     @if (auth()->user()->personalRrhh)
         <section class="card shadow-sm border-0 mt-3">
             <div class="card-body">
@@ -73,4 +96,91 @@
             </div>
         </section>
     @endif
+
+    @if (auth()->user()->personalRrhh && $candidato && $postulacion->puedeEnviarse())
+        <div class="modal fade" id="enviarEmpresa" tabindex="-1" aria-labelledby="enviarEmpresaTitulo" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form class="modal-content" method="POST" action="{{ route('postulaciones.enviar', $postulacion) }}">
+                    @csrf
+                    <div class="modal-header">
+                        <h2 class="modal-title h5" id="enviarEmpresaTitulo">Esto va a ver la empresa</h2>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <dl class="row g-3 mb-0">
+                            <div class="col-12 col-md-6">
+                                <dt class="text-secondary small fw-normal">Candidato</dt>
+                                <dd class="mb-0">{{ $candidato->nombre }} {{ $candidato->apellido }}</dd>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <dt class="text-secondary small fw-normal">Correo</dt>
+                                <dd class="mb-0">{{ $candidato->usuario?->correo ?? '—' }}</dd>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <dt class="text-secondary small fw-normal">Puesto</dt>
+                                <dd class="mb-0">{{ $postulacion->oferta->busqueda->nombre_puesto }} · {{ $postulacion->oferta->busqueda->empresa->nombre }}</dd>
+                            </div>
+                            <div class="col-12">
+                                <dt class="text-secondary small fw-normal">Compatibilidad</dt>
+                                <dd class="mb-0">
+                                    <span class="badge rounded-pill {{ $postulacion->claseCompatibilidad() }}">{{ $postulacion->textoCompatibilidad() }}</span>
+                                    @if ($reglas = data_get($postulacion->compatibilidad_detalle, 'reglas'))
+                                        <ul class="small text-secondary mb-0 ps-3 mt-2">
+                                            @foreach ($reglas as $regla)
+                                                <li>{{ $regla }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <p class="text-secondary small mt-4 mb-3">Teléfono, descripción y comentario son opcionales. Si los completás, la empresa los ve en esta solicitud. El perfil del candidato no cambia.</p>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="telefono">Teléfono</label>
+                            <input class="form-control @error('telefono') is-invalid @enderror" type="text" id="telefono" name="telefono" maxlength="40" value="{{ old('telefono', $postulacion->envio?->telefono) }}">
+                            @error('telefono')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="descripcion">Descripción del candidato</label>
+                            <textarea class="form-control @error('descripcion') is-invalid @enderror" id="descripcion" name="descripcion" rows="3" maxlength="2000">{{ old('descripcion', $postulacion->envio ? $postulacion->envio->descripcion : $candidato->descripcion) }}</textarea>
+                            @error('descripcion')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="comentario">Comentarios de entrevista</label>
+                            <textarea class="form-control @error('comentario') is-invalid @enderror" id="comentario" name="comentario" rows="3" maxlength="2000">{{ old('comentario', $postulacion->envio?->comentario) }}</textarea>
+                            @error('comentario')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">{{ $postulacion->envio ? 'Guardar envío' : 'Enviar' }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 @endsection
+
+@push('scripts')
+    @if ($errors->hasAny(['telefono', 'descripcion', 'comentario']))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('enviarEmpresa');
+
+                if (modal) {
+                    window.bootstrap?.Modal.getOrCreateInstance(modal).show();
+                }
+            });
+        </script>
+    @endif
+@endpush
